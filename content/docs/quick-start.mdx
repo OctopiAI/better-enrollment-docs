@@ -4,8 +4,7 @@ description: Set up Better Enrollment step by step, for a closed app or open sig
 ---
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
-import { Server as ServerIcon, MonitorSmartphone as ClientIcon } from "lucide-react";
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
 Better Enrollment runs in one of two modes, and the setup flow is the same for both; only your auth config differs. Pick your path once and the examples on this page follow it:
 
@@ -124,18 +123,7 @@ export const authClient = createAuthClient({
 
 Invites are created by an admin (or an org member with permission). Create them from your server, or from an admin dashboard with the client:
 
-<Tabs groupId="env" persist defaultValue="Server">
-
-<TabsList>
-  <TabsTrigger value="Server">
-    <ServerIcon className="size-3.5" />
-    Server
-  </TabsTrigger>
-  <TabsTrigger value="Client">
-    <ClientIcon className="size-3.5" />
-    Client
-  </TabsTrigger>
-</TabsList>
+<Tabs groupId="env" persist items={['Server', 'Client']}>
 
 <Tab value="Server">
 

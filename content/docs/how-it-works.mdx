@@ -10,6 +10,16 @@ description: The lifecycle of an invitation, from create to redeem.
 - All state changes are guarded atomic writes: parallel redemptions of a one-seat invite produce exactly one winner. Expiry is derived from `expiresAt` at read time, so there is no cron and nothing to sweep.
 - While a private invite is pending, its email is locked on every path: sign-in, sign-up, password reset, and OAuth linking are all blocked without leaking that the invite exists.
 
+<Callout type="warn" title="Role changes made outside this plugin do not merge">
+  The union merge above applies only to roles granted through invite redemption. Better Auth stores
+  multiple roles as one comma-separated string (for example `"user,org-creator"`), and other role
+  writers replace that string wholesale. The admin plugin's `setRole` is the usual culprit: it
+  overwrites the field with exactly what you send, so calling it with just `"admin"` silently
+  strips roles the user gained through invites. When you change roles from your own admin UI,
+  always send the full set. See the
+  [recipe](/docs/recipes#changing-roles-without-losing-invite-granted-ones).
+</Callout>
+
 ## Where to go next
 
 <Cards>

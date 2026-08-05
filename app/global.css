@@ -138,6 +138,29 @@
   border-radius: 0;
 }
 
+/* Sidebar search trigger: brand purple border */
+#nd-sidebar [data-search-full] {
+  border-color: var(--primary);
+}
+
+/* Sidebar footer: fumadocs wraps the GitHub icon link and the theme toggle in
+   one full-width bordered row, so the frame stretches between them. Drop the
+   row frame and border each control on its own instead. */
+#nd-sidebar div.border:has(> [data-theme-toggle]) {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+#nd-sidebar div:has(> [data-theme-toggle]) > a {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--secondary) 50%, transparent);
+}
+#nd-sidebar div:has(> [data-theme-toggle]) > [data-theme-toggle] {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--secondary) 50%, transparent);
+  padding: 1px 4px;
+}
+
 html {
   scrollbar-gutter: stable;
 }

@@ -30,3 +30,24 @@ An `org-create` invite bypasses this gate by design; the invitation is itself th
 ```ts
 organization({ allowUserToCreateOrganization: roleGate(["admin", "org-creator"]) });
 ```
+
+## Changing roles without losing invite-granted ones
+
+Better Auth stores multiple roles as one comma-separated string, and the admin plugin's `setRole`
+replaces the whole field with whatever you send. Invite redemption grants roles by merging into
+that field, so a bare `setRole({ role: "admin" })` from your admin UI silently strips anything an
+invite granted earlier (such as `org-creator`). Always compute the union first:
+
+```ts
+const roles = (user.role || "user")
+  .split(",")
+  .map((r) => r.trim())
+  .filter(Boolean);
+
+if (!roles.includes("admin")) {
+  await authClient.admin.setRole({ userId: user.id, role: [...roles, "admin"] });
+}
+```
+
+Demoting is the same in reverse: filter the role out and send what remains, falling back to your
+default role when the list would be empty.
