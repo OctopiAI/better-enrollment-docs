@@ -1,0 +1,87 @@
+---
+title: Options
+description: Every option betterEnrollment accepts, with defaults.
+---
+
+```ts title="auth.ts"
+betterEnrollment({
+  // Mode
+  mode: "auto", // "auto" | "invite-only" | "open"
+  allowOpenSignup: false,
+
+  // Delivery. Implementations are yours; the plugin never sends mail.
+  async sendPrivateInvitation({
+    email,
+    name,
+    role,
+    kind,
+    mode,
+    url,
+    token,
+    inviterName,
+    inviterEmail,
+    organizationName,
+    expiresAt
+  }) {},
+  async sendPublicInvitation({
+    role,
+    kind,
+    mode,
+    url,
+    token,
+    inviterName,
+    inviterEmail,
+    organizationName,
+    maxUses,
+    expiresAt
+  }) {},
+
+  // Roles
+  validRoles: ["user", "admin"], // omit to skip validation
+  fallbackRole: undefined, // used when an invited role was deleted
+  defaultRole: "user",
+
+  // Lifetime and usage
+  expiresIn: 60 * 60 * 24 * 7, // private invites, in seconds
+  publicExpiresIn: 60 * 60 * 24 * 7, // public invites; null = never
+
+  // Security posture
+  hashTokens: true,
+  autoVerifyPublicInviteEmail: false, // see "Verifying public-invite emails"
+  exposeEmailOnGet: false,
+
+  // Who may manage invitations
+  adminRoles: ["admin"],
+  adminUserIds: [],
+  canManageInvites: undefined, // (user) => boolean, replaces the two above
+
+  // Links
+  buildInviteUrl: ({ token, type, mode }) => `https://app.example.com/invite?token=${token}`,
+
+  // Organizations
+  organization: {
+    ac,
+    roles, // the same objects given to the org plugin
+    canCreateOrgInvites: undefined, // (member, org) => boolean
+    allowOwnerInvites: false,
+    defaultOrganizationRole: "member",
+    orgCreateRole: "owner",
+    defaultSeatLimit: undefined,
+    resolveSeatLimit: undefined, // async (org) => number | null
+    revokeInvitesOnInviterBan: true,
+    onOrgMemberAdded,
+    onSeatLimitReached,
+    onOrgDisabled,
+    onOrgEnabled,
+    onOrgDeleted
+  },
+
+  // Lifecycle hooks
+  onInviteCreated,
+  onInviteAccepted,
+  onInviteRevoked,
+  onInviteDeleted,
+  onInviteExpired,
+  onInvalidRole
+});
+```

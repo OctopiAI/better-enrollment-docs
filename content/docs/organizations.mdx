@@ -1,0 +1,60 @@
+---
+title: Organizations
+description: Org invites, seat limits, and platform controls.
+---
+
+Org features switch on when the organization plugin is detected. Pass the same `ac` and `roles` objects you gave the org plugin:
+
+```ts title="auth.ts"
+import { organization } from "better-auth/plugins";
+import { betterEnrollment, roleGate } from "@octopi-ai/better-enrollment";
+
+plugins: [
+  admin(),
+  organization({
+    ac, roles,
+    allowUserToCreateOrganization: roleGate(["admin", "org-creator"]),
+  }),
+  betterEnrollment({
+    organization: {
+      ac, roles,
+      defaultOrganizationRole: "member",
+      defaultSeatLimit: 10,
+    },
+  }),
+],
+```
+
+Redeeming an org invite writes the member row (and team membership when `teamId` is set) in the same flow that creates the account, then sets the session's active organization. Redemption re-validates everything, since state drifts between create and accept.
+
+## Seat limits
+
+Seat limits resolve in order: `resolveSeatLimit(org)` callback, the org's `seatLimit` column, `defaultSeatLimit`, then unlimited. Seats used = members + pending invite reservations (a private invite reserves one seat, a public one reserves `maxUses - useCount`). Enforcement happens at creation and again inside a guarded write at redemption, so parallel accepts never overshoot.
+
+```ts
+await authClient.invite.org.setSeatLimit({ organizationId, seatLimit: 25 });
+await authClient.invite.org.usage({ organizationId });
+// -> { seatLimit, members, pendingReserved, remaining }
+```
+
+## Platform controls
+
+App-admin only: disable, enable, and delete organizations. A disabled org refuses invite creation, redemption, and org plugin mutations. Member accounts are never touched by default; `banMembers: true` additionally bans every member app-wide, for fraud takedowns.
+
+```ts
+await authClient.invite.org.disable({ organizationId });
+await authClient.invite.org.enable({ organizationId });
+await authClient.invite.org.delete({ organizationId });
+```
+
+## Who can do what
+
+| Action                             | App admin           | Org owner or admin | Member with `invitation:create` | Plain member |
+| ---------------------------------- | ------------------- | ------------------ | ------------------------------- | ------------ |
+| Create `app` / `org-create` invite | Yes                 | No                 | No                              | No           |
+| Create `org-join` invite           | **No**              | Yes                | Yes                             | No           |
+| List invites                       | All                 | Own org            | Own org                         | No           |
+| Revoke or delete                   | Moderation backstop | Own org            | Own org (`invitation:cancel`)   | No           |
+| Seat limits, disable, delete org   | Yes                 | No                 | No                              | No           |
+
+App admins come from `adminRoles` (default `["admin"]`), `adminUserIds`, or your own `canManageInvites(user)` callback. Org permissions are the org plugin's own access control. Cross-org calls return `FORBIDDEN`, and unknown org ids look identical so they cannot be enumerated.

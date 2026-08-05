@@ -1,0 +1,25 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "installation",
+    "quick-start",
+    "---Core Concepts---",
+    "how-it-works",
+    "modes",
+    "invites",
+    "invite-page",
+    "organizations",
+    "---Reference---",
+    "options",
+    "client-api",
+    "errors",
+    "database",
+    "---Guides---",
+    "security",
+    "recipes",
+    "operations",
+    "roadmap"
+  ]
+}

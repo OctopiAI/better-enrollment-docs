@@ -1,0 +1,44 @@
+---
+title: Introduction
+description: What Better Enrollment is and what it gives you.
+---
+
+Better Enrollment is a plugin for [Better Auth](https://www.better-auth.com) that makes invitations the front door of your app. Run fully invite-only, hand out shareable invite links, or use invites as role and organization grants in an open app.
+
+## Features
+
+- **Invite-only mode**: close every sign-up route and let people in only through invitations.
+- **Open mode**: invitations become role and organization grants for self-serve sign-ups.
+- **Private invites**: email-bound, single use, verified on accept.
+- **Public invites**: shareable links with use caps, expiry, and revocation.
+- **Organization onboarding**: one link joins an org, or lets the invitee found their own.
+- **Seat limits**: per-org caps with pending-invite reservations and subscription hooks.
+- **Security first**: hashed tokens, atomic race-safe redemption, no email oracles.
+- **Audit trail**: append-only record of who invited whom and who redeemed what.
+- **One redemption page**: a single `?token=` page and one `redeem` call handle every invite kind in both modes.
+- **Adapter-agnostic**: works with any Better Auth database adapter, no extra infrastructure.
+
+## Get started
+
+<Cards>
+  <Card
+    title="Installation"
+    description="Add the package and generate the schema."
+    href="/docs/installation"
+  />
+  <Card
+    title="Quick Start"
+    description="Server and client setup, then your first invite."
+    href="/docs/quick-start"
+  />
+  <Card
+    title="How it works"
+    description="The lifecycle of an invitation, from create to redeem."
+    href="/docs/how-it-works"
+  />
+  <Card
+    title="The two modes"
+    description="Invite-only and open, and how auto-detection picks one."
+    href="/docs/modes"
+  />
+</Cards>

@@ -1,0 +1,49 @@
+---
+title: Installation
+description: Add Better Enrollment to your project and generate the schema.
+---
+
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+## Install the package
+
+<Tabs groupId="package-manager" persist items={['npm', 'pnpm', 'yarn', 'bun']}>
+
+```bash tab="npm"
+npm install @octopi-ai/better-enrollment
+```
+
+```bash tab="pnpm"
+pnpm add @octopi-ai/better-enrollment
+```
+
+```bash tab="yarn"
+yarn add @octopi-ai/better-enrollment
+```
+
+```bash tab="bun"
+bun add @octopi-ai/better-enrollment
+```
+
+</Tabs>
+
+Requires `better-auth >= 1.4.0` and `zod >= 4`.
+
+## Generate the schema
+
+After adding the plugin to your Better Auth configuration, generate or migrate your schema as usual:
+
+```bash
+npx @better-auth/cli migrate
+# or
+npx @better-auth/cli generate
+```
+
+This creates the `invite` and `inviteUse` tables. When organization features are enabled, the `organization` table also gains `seatLimit` and `disabledAt` columns.
+
+<Callout type="warn" title="Role field required">
+  Invited roles are stored in a string `role` field on your user model, and the default admin gate
+  reads it. The admin plugin provides one, or add it yourself via `user.additionalFields`. Without
+  it, the plugin warns at startup and you must gate management with `adminUserIds` or
+  `canManageInvites` instead.
+</Callout>

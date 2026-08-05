@@ -1,0 +1,32 @@
+---
+title: Recipes
+description: Short patterns for common setups.
+---
+
+## Custom invite link URL
+
+```ts
+buildInviteUrl: ({ token }) => `${process.env.APP_URL}/invite?token=${encodeURIComponent(token)}`,
+```
+
+## Captcha on redemption endpoints
+
+```ts
+captcha({ endpoints: ["/invite/redeem", "/invite/accept", "/invite/activate"] });
+```
+
+## Breached password checks for invited users
+
+```ts
+haveIBeenPwned({
+  paths: ["/sign-up/email", "/reset-password", "/invite/redeem", "/invite/accept"]
+});
+```
+
+## Gating org creation by role
+
+An `org-create` invite bypasses this gate by design; the invitation is itself the authorization:
+
+```ts
+organization({ allowUserToCreateOrganization: roleGate(["admin", "org-creator"]) });
+```

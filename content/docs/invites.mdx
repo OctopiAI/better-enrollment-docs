@@ -1,0 +1,115 @@
+---
+title: Invites
+description: Invite kinds, delivery types, and how to create each one.
+---
+
+Two choices define every invite: what it grants (`kind`) and how it travels (`type`). Everything else resolves server-side.
+
+## Kinds
+
+| Kind            | Grants                                 | Who may create it                                |
+| --------------- | -------------------------------------- | ------------------------------------------------ |
+| `app` (default) | Access to the app                      | App admins                                       |
+| `org-join`      | Membership in an existing organization | That org's members with `invitation: ["create"]` |
+| `org-create`    | Founding and owning a new organization | App admins                                       |
+
+App admins deliberately cannot create `org-join` invites: an organization owns its member list, and the platform's lever is the seat limit. Org kinds require the organization plugin.
+
+## Delivery
+
+|                          | Private                                 | Public                                   |
+| ------------------------ | --------------------------------------- | ---------------------------------------- |
+| Bound to                 | One email address                       | Nobody                                   |
+| Uses                     | Always exactly 1                        | `maxUses`, or unlimited when `null`      |
+| Delivery                 | Emailed by your `sendPrivateInvitation` | A link you distribute                    |
+| Link visible to creator  | **Never**                               | Yes, returned once                       |
+| Email verified on accept | Yes                                     | No, unless `autoVerifyPublicInviteEmail` |
+
+No email delivery? Use a public invite with `maxUses: 1`. There is deliberately no option to reveal a private link, because possession of one is proof of mailbox access.
+
+## Creating invites
+
+A private invite for a closed beta:
+
+```ts
+await auth.api.createInvite({
+  body: { type: "private", email: "ada@example.com", name: "Ada", role: "user" },
+  headers
+});
+// -> { inviteId, expiresAt }
+```
+
+A capped public signup link:
+
+```ts
+await auth.api.createInvite({
+  body: { type: "public", role: "user", maxUses: 50 },
+  headers
+});
+// -> { inviteId, expiresAt, token, url }
+```
+
+An org owner inviting a teammate (`organizationRole` goes to `member.role`):
+
+```ts
+await auth.api.createInvite({
+  body: {
+    kind: "org-join",
+    type: "private",
+    email: "dev@acme.com",
+    organizationId: org.id,
+    organizationRole: "developer"
+  },
+  headers: ownerHeaders
+});
+```
+
+The app-level `role` field is admin-only. `org-join` invites reject it (`ROLE_NOT_ALLOWED_FOR_ORG_JOIN`) and always grant `defaultRole`: org inviters are trusted by their organization, not by the app, so letting them pick `user.role` would let any org owner mint app admins.
+
+Partner onboarding, where the recipient signs up and founds their own organization in one form:
+
+```ts
+await auth.api.createInvite({
+  body: {
+    kind: "org-create",
+    type: "private",
+    email: "founder@acme.com",
+    role: "user",
+    presetSeatLimit: 25
+  },
+  headers
+});
+```
+
+A public `org-join` invite is a shareable join link for one org (in a seat-limited org `maxUses` is required). A public `org-create` invite founds a separate organization per use.
+
+## Inviting someone who already has an account
+
+This works out of the box for org kinds: the invite becomes an activation invite, the invitee signs in and confirms, and redemption merges roles and membership instead of creating a user. A plain `app` invite to an existing email is rejected with `USER_ALREADY_EXISTS`, since it grants nothing an existing user lacks.
+
+## Verifying public-invite emails
+
+A private invite token traveled through the recipient's inbox, so accepting it proves mailbox ownership and the user is marked verified. A public invite proves only possession of the link: the accepter can type any email address, so the user is created with `emailVerified: false`.
+
+Verification then happens through Better Auth's standard flow, which this plugin deliberately does not replace. Configure it and public-invite signups are covered automatically:
+
+```ts title="auth.ts"
+export const auth = betterAuth({
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail(user.email, "Verify your email", url);
+    },
+    sendOnSignUp: true // also fires for public-invite signups, since they start unverified
+  },
+  // Optional: block sign-in until verified
+  emailAndPassword: { requireEmailVerification: true }
+});
+```
+
+The accepter still gets a session immediately; they verify by clicking the emailed link like any other signup.
+
+<Callout type="warn">
+  Set `autoVerifyPublicInviteEmail: true` only when you skip that flow entirely (internal tools,
+  trusted environments). It marks public-invite users verified on the spot, which means anyone
+  holding the link can register an address they do not own.
+</Callout>

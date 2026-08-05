@@ -1,0 +1,26 @@
+---
+title: How it works
+description: The lifecycle of an invitation, from create to redeem.
+---
+
+- An admin (or an org member with permission) creates an invite; private invites are emailed, public invites return a shareable URL once.
+- Tokens are crypto-random and stored SHA-256 hashed, so a database leak exposes no usable links. A private invite link is never shown to its creator: only the emailed recipient holds it, which is why accepting one marks the email verified.
+- Every invite link points at one page in your app carrying only `?token=`. The page calls `invite.get`, renders what `nextAction` and `requiredFields` say, and submits to `invite.redeem`.
+- In invite-only mode redemption creates the user, credential account, and session. In open mode it merges the invited role (and org membership) into the signed-in user's account. Roles always merge as a union, so an invite can never demote anyone.
+- All state changes are guarded atomic writes: parallel redemptions of a one-seat invite produce exactly one winner. Expiry is derived from `expiresAt` at read time, so there is no cron and nothing to sweep.
+- While a private invite is pending, its email is locked on every path: sign-in, sign-up, password reset, and OAuth linking are all blocked without leaking that the invite exists.
+
+## Where to go next
+
+<Cards>
+  <Card
+    title="The two modes"
+    description="Invite-only and open, and how auto-detection picks one."
+    href="/docs/modes"
+  />
+  <Card
+    title="Invites"
+    description="Kinds, delivery types, and how to create each one."
+    href="/docs/invites"
+  />
+</Cards>

@@ -1,0 +1,64 @@
+---
+title: The invite page
+description: One page and one redeem call handle every invite kind.
+---
+
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+Every invitation link points at the same page, carrying only `?token=`. The invitee never needs to know what kind of invite they hold.
+
+```ts
+const { data: invite } = await authClient.invite.get({ token });
+```
+
+## Rendering by `nextAction`
+
+| `invite.nextAction` | Meaning                       | What to render                               |
+| ------------------- | ----------------------------- | -------------------------------------------- |
+| `SIGN_UP`           | Invite-only, no session       | The fields listed in `requiredFields`        |
+| `SIGN_IN`           | Open mode, no session         | Your sign-in form; keep the token in the URL |
+| `CONFIRM`           | Open mode, session present    | A single confirm button                      |
+| `null`              | Expired, revoked, or consumed | A clear terminal message                     |
+
+`requiredFields` lists exactly what to collect: always `password` for sign-up, plus `email` for public invites, plus `organizationName` and `organizationSlug` for `org-create`.
+
+### What your page will see
+
+<Tabs groupId="mode" persist items={['Invite-only (closed app)', 'Open sign-up']}>
+
+<Tab value="Invite-only (closed app)">
+
+Invitees have no account, so live invites always return `nextAction: "SIGN_UP"`: your page is a sign-up form driven by `requiredFields`. You only ever handle two states, `SIGN_UP` and `null`.
+
+</Tab>
+
+<Tab value="Open sign-up">
+
+Invitees are normal users, so live invites return `"SIGN_IN"` (no session; show your sign-in form and keep the token in the URL) or `"CONFIRM"` (signed in; show one confirm button). `SIGN_UP` never appears in open mode.
+
+</Tab>
+
+</Tabs>
+
+## Redeeming
+
+Submit everything to one endpoint:
+
+```ts
+await authClient.invite.redeem({
+  token,
+  password,
+  name,
+  email,
+  organizationName,
+  organizationSlug
+});
+// -> { status: "ACCEPTED", user, organization? }
+```
+
+`redeem` routes to the right semantics for the mode and kind, so your page never branches. The response says what happened, so you can render "You joined Acme" or "Your organization is ready".
+
+<Callout title="A deliberately thin payload">
+  `invite.get` returns only kind, role, derived status, expiry, uses remaining, and a masked email
+  such as `a***@example.com`. Never the inviter's identity or internal ids.
+</Callout>

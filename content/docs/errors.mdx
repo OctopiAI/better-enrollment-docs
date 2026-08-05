@@ -1,0 +1,26 @@
+---
+title: Error codes
+description: Every APIError code the plugin can return.
+---
+
+Errors are Better Auth `APIError`s carrying a `code` and a `message`:
+
+```ts
+import { INVITE_ERROR_CODES } from "@octopi-ai/better-enrollment";
+```
+
+| Code                                                      | When                                           |
+| --------------------------------------------------------- | ---------------------------------------------- |
+| `INVITE_NOT_FOUND`                                        | Unknown or no longer valid token               |
+| `INVITE_EXPIRED`, `INVITE_REVOKED`, `INVITE_ALREADY_USED` | Terminal states                                |
+| `EMAIL_ALREADY_INVITED`                                   | A pending invite already holds that address    |
+| `USER_ALREADY_EXISTS`                                     | That address already has an account            |
+| `INVALID_ROLE`, `ROLE_NO_LONGER_VALID`                    | Role rejected at create, or at redeem          |
+| `ROLE_NOT_ALLOWED_FOR_ORG_JOIN`                           | `org-join` invites cannot set an app role      |
+| `NOT_ALLOWED_TO_MANAGE_INVITES`                           | Failed the admin gate                          |
+| `EMAIL_MISMATCH`, `EMAIL_NOT_VERIFIED`                    | Open-mode activation guards                    |
+| `SEAT_LIMIT_REACHED`                                      | No seats left, at create or at redeem          |
+| `ORG_INVITE_NOT_ALLOWED`                                  | Not permitted to invite into that organization |
+| `ORG_DISABLED`                                            | The organization is disabled                   |
+| `ORG_SLUG_TAKEN`                                          | Slug collision while founding an organization  |
+| `USER_BANNED`                                             | Banned accounts cannot redeem                  |

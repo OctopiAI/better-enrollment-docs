@@ -1,0 +1,40 @@
+---
+title: Security
+description: What is blocked, why, and how tokens are stored.
+---
+
+## What is blocked in invite-only mode
+
+While a private invite is pending:
+
+| Attempt                               | Blocked by                                                       | Response                                |
+| ------------------------------------- | ---------------------------------------------------------------- | --------------------------------------- |
+| `POST /sign-up/email`                 | Better Auth `disableSignUp`                                      | `EMAIL_PASSWORD_SIGN_UP_DISABLED`       |
+| `POST /sign-in/email`                 | No credential account exists yet                                 | `INVALID_EMAIL_OR_PASSWORD`             |
+| `POST /request-password-reset`        | Plugin before-hook                                               | Silent success, nothing sent, no oracle |
+| OAuth sign-up as a new user           | Provider `disableSignUp`                                         | Redirect with `?error=signup_disabled`  |
+| OAuth linking to the pre-created user | `requireLocalEmailVerified` plus an `account.create.before` hook | Account not linked                      |
+
+After acceptance the user is verified, so OAuth linking works normally.
+
+## Why the password-reset hook exists
+
+A private invite pre-creates an inert user, which locks the email. Without the hook, whoever controls the mailbox could set a password through the reset flow and skip the invite entirely, and outsiders could probe the endpoint to learn who has been invited. The hook returns Better Auth's own generic success response, byte-identical to the unknown-email case, and sends nothing.
+
+## The email lock
+
+An address stays locked while a pending invite row exists for it, even past `expiresAt`; re-inviting returns `CONFLICT`. The lock is global for `app` and `org-create` invites but per-organization for `org-join`, so the same person can hold pending invites to several orgs, and an org inviter cannot probe for pending invites outside their own org. `invite.delete` removes a pending or cancelled invite plus its still-inert pre-created user, which frees the address. Accepted invites are permanent audit records and cannot be deleted.
+
+Revoking is softer than deleting: the pre-created user stays behind, so both the password-reset hook and the OAuth-linking hook keep blocking for any non-accepted invite (pending or cancelled), not just pending ones.
+
+## No account oracles
+
+When a signed-out visitor tries to accept a public invite with an email that already has an account, the response is the same `SIGN_IN_REQUIRED` action the activation flow uses, so the endpoint never confirms whether an account exists. The same guard covers activation invites called through `/invite/accept` directly: an invite issued to an already-established account can only merge inside that account's own session, never set its password from the token. The invite token proves mailbox control; changing or joining an existing account requires proof of account control, which is a session.
+
+## Tokens
+
+Tokens are `generateRandomString(32)` from Better Auth's crypto module, roughly 190 bits of entropy, stored as SHA-256 base64url and looked up by hash. A database leak exposes no usable links.
+
+## Reporting security issues
+
+If you discover a vulnerability, report it privately to [talat@octopi.ai](mailto:talat@octopi.ai) instead of opening a public issue. Include steps to reproduce where possible.

@@ -1,0 +1,218 @@
+---
+title: Database
+description: The tables the plugin creates, every column, and how they are indexed.
+---
+
+Better Enrollment adds two tables, `invite` and `inviteUse`, and extends the organization plugin's `organization` table when org features are enabled. Run `npx @better-auth/cli generate` after installing to add them to your schema.
+
+## invite
+
+One row per invitation. Status is only ever `pending`, `accepted`, or `cancelled`; expired is derived from `expiresAt` at read time, so there is no cron and nothing to sweep.
+
+export const inviteFields = [
+  {
+    name: "id",
+    type: "string",
+    description: "Unique identifier for each invite",
+    isPrimaryKey: true
+  },
+  {
+    name: "type",
+    type: "string",
+    description: 'Delivery type: "private" (email-bound, single use) or "public" (shareable link)'
+  },
+  {
+    name: "kind",
+    type: "string",
+    description: 'What redeeming grants: "app", "org-join", or "org-create". Defaults to "app"'
+  },
+  {
+    name: "email",
+    type: "string",
+    description: "Address a private invite is bound to; null for public invites. Indexed",
+    isOptional: true
+  },
+  {
+    name: "name",
+    type: "string",
+    description: "Optional display name for the invitee",
+    isOptional: true
+  },
+  {
+    name: "role",
+    type: "string",
+    description: "Role merged into the user on redemption"
+  },
+  {
+    name: "tokenHash",
+    type: "string",
+    description: "Hash of the invite token; the raw token is never stored",
+    isUnique: true
+  },
+  {
+    name: "status",
+    type: "string",
+    description:
+      '"pending", "accepted", or "cancelled". "expired" is derived from expiresAt and never stored. Indexed'
+  },
+  {
+    name: "mode",
+    type: "string",
+    description: 'Mode the invite was created for: "invite-only" or "open"'
+  },
+  {
+    name: "organizationId",
+    type: "string",
+    description:
+      "Organization an org-join invite adds the invitee to. Plain column, no FK: accepted invites survive org deletion as audit records. Indexed",
+    isOptional: true
+  },
+  {
+    name: "organizationRole",
+    type: "string",
+    description: "Role granted inside the organization on join",
+    isOptional: true
+  },
+  {
+    name: "teamId",
+    type: "string",
+    description: "Team the invitee is added to, when the org plugin uses teams",
+    isOptional: true
+  },
+  {
+    name: "presetSeatLimit",
+    type: "number",
+    description: "Seat limit applied to the organization founded through an org-create invite",
+    isOptional: true
+  },
+  {
+    name: "preCreatedUserId",
+    type: "string",
+    description: "Shell user pre-created for a private invite; claimed by the invitee on accept",
+    isOptional: true
+  },
+  {
+    name: "createdByUserId",
+    type: "string",
+    description:
+      "User who created the invite. Plain column, no FK: the record outlives the inviter. Indexed",
+    isOptional: true
+  },
+  {
+    name: "inviterName",
+    type: "string",
+    description: "Denormalized inviter name, kept for display and audit"
+  },
+  {
+    name: "inviterEmail",
+    type: "string",
+    description: "Denormalized inviter email, kept for display and audit"
+  },
+  {
+    name: "expiresAt",
+    type: "date",
+    description: "Expiry timestamp; null means the invite never expires. Indexed",
+    isOptional: true
+  },
+  {
+    name: "maxUses",
+    type: "number",
+    description: "Redemption cap for public invites; null means unlimited",
+    isOptional: true
+  },
+  {
+    name: "useCount",
+    type: "number",
+    description: "Successful redemptions so far. Defaults to 0"
+  },
+  {
+    name: "revokedAt",
+    type: "date",
+    description: "When the invite was revoked",
+    isOptional: true
+  },
+  {
+    name: "revokedByUserId",
+    type: "string",
+    description: "User who revoked the invite",
+    isOptional: true
+  },
+  {
+    name: "createdAt",
+    type: "date",
+    description: "When the invite was created"
+  },
+  {
+    name: "updatedAt",
+    type: "date",
+    description: "When the invite was last updated"
+  }
+];
+
+<DatabaseTable name="invite" fields={inviteFields} />
+
+## inviteUse
+
+Append-only audit table: one row per redemption. Rows are never updated, and they cascade only when their invite is deleted.
+
+export const inviteUseFields = [
+  {
+    name: "id",
+    type: "string",
+    description: "Unique identifier for each redemption",
+    isPrimaryKey: true
+  },
+  {
+    name: "inviteId",
+    type: "string",
+    description: "The invite that was redeemed. Indexed",
+    isForeignKey: true,
+    references: { model: "invite", field: "id" }
+  },
+  {
+    name: "usedByUserId",
+    type: "string",
+    description: "User who redeemed the invite"
+  },
+  {
+    name: "inviteeEmail",
+    type: "string",
+    description: "Email of the invitee at redemption time"
+  },
+  {
+    name: "usedAt",
+    type: "date",
+    description: "When the invite was redeemed"
+  }
+];
+
+<DatabaseTable name="inviteUse" fields={inviteUseFields} />
+
+## organization (extension)
+
+Columns added to the organization plugin's table, and only when org features are configured, so apps without the org plugin never get stray columns.
+
+export const organizationFields = [
+  {
+    name: "seatLimit",
+    type: "number",
+    description: "Maximum member count for the organization; enforced on joins",
+    isOptional: true
+  },
+  {
+    name: "disabledAt",
+    type: "date",
+    description: "When the organization was disabled by a platform control",
+    isOptional: true
+  }
+];
+
+<DatabaseTable name="organization" fields={organizationFields} />
+
+## Indexes
+
+The schema indexes `email`, `organizationId`, `tokenHash` (unique), `status`, `expiresAt`, and `createdByUserId`. If your invite table grows into the millions, consider adding composite indexes `(email, status)` and `(organizationId, status)` in your own migrations; Better Auth's schema DSL only expresses single-column indexes.
+
+## Prisma example
+
+A complete Prisma schema example lives in [`examples/prisma`](https://github.com/OctopiAI/better-enrollment/tree/main/examples/prisma).

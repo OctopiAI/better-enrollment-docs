@@ -1,0 +1,47 @@
+---
+title: The two modes
+description: Invite-only and open, and how auto-detection picks one.
+---
+
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+Better Enrollment's `mode` accepts `"auto"` (default), `"invite-only"`, or `"open"`. In `auto` the plugin inspects your config at startup: everything closed means invite-only, everything open means open, and a mixed config throws with a message naming each path, asking you to set `mode` explicitly.
+
+<Callout type="warn" title="Your responsibility, for now">
+  Detection only sees `emailAndPassword` and `socialProviders`. Sign-up paths added by other plugins
+  (magic link, email OTP, passkey, phone number, anonymous, generic OAuth) are invisible to it and
+  are NOT blocked at runtime, so any of them silently bypasses invite-only mode. If you use one, you
+  must close or remove its sign-up path yourself. A runtime backstop that rejects non-invite user
+  creation is on the [roadmap](/docs/roadmap).
+</Callout>
+
+## The two configurations
+
+<Tabs groupId="mode" persist items={['Invite-only (closed app)', 'Open sign-up']}>
+
+<Tab value="Invite-only (closed app)">
+
+All sign-up routes are disabled and the plugin creates users through Better Auth's internal adapter. Setting it explicitly while a sign-up path is still open throws at init; `allowOpenSignup: true` downgrades that to a warning, and the guarantee becomes per-email: pending invites still lock their own address while everyone else signs up freely.
+
+```ts title="auth.ts"
+emailAndPassword: {
+  enabled: true,
+  disableSignUp: true
+},
+plugins: [admin(), betterEnrollment({ /* ... */ })],
+```
+
+</Tab>
+
+<Tab value="Open sign-up">
+
+Anyone signs up normally, and redeeming an invite merges the invited role and any org membership into their existing account.
+
+```ts title="auth.ts"
+emailAndPassword: { enabled: true },
+plugins: [admin(), betterEnrollment({ /* ... */ })],
+```
+
+</Tab>
+
+</Tabs>
