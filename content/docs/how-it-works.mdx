@@ -1,34 +1,109 @@
 ---
 title: How it works
 description: The lifecycle of an invitation, from create to redeem.
+icon: Workflow
 ---
 
-- An admin (or an org member with permission) creates an invite; private invites are emailed, public invites return a shareable URL once.
-- Tokens are crypto-random and stored SHA-256 hashed, so a database leak exposes no usable links. A private invite link is never shown to its creator: only the emailed recipient holds it, which is why accepting one marks the email verified.
-- Every invite link points at one page in your app carrying only `?token=`. The page calls `invite.get`, renders what `nextAction` and `requiredFields` say, and submits to `invite.redeem`.
-- In invite-only mode redemption creates the user, credential account, and session. In open mode it merges the invited role (and org membership) into the signed-in user's account. Roles always merge as a union, so an invite can never demote anyone.
-- All state changes are guarded atomic writes: parallel redemptions of a one-seat invite produce exactly one winner. Expiry is derived from `expiresAt` at read time, so there is no cron and nothing to sweep.
-- While a private invite is pending, its email is locked on every path: sign-in, sign-up, password reset, and OAuth linking are all blocked without leaking that the invite exists.
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { Split, Ticket } from "lucide-react";
+
+## The lifecycle
+
+<Steps>
+
+<Step>
+
+### Someone creates an invite
+
+An admin (or an org member with permission) creates it. Private invites are emailed by your `sendPrivateInvitation`; public invites return a shareable URL once. A private invite link is never shown to its creator: only the emailed recipient holds it, which is why accepting one marks the email verified.
+
+</Step>
+
+<Step>
+
+### The invitee lands on your invite page
+
+Every invite link points at one page in your app carrying only `?token=`. The page calls `invite.get`, renders what `nextAction` and `requiredFields` say, and submits to `invite.redeem`.
+
+</Step>
+
+<Step>
+
+### Redemption grants access
+
+In invite-only mode redemption creates the user and their credential account. In open mode it merges the invited role (and org membership) into the signed-in user's account. Roles always merge as a union, so an invite can never demote anyone. Redemption never creates or mutates a session: the accepter signs in through your normal flow with the credentials they just set, and your app decides the active organization there.
+
+</Step>
+
+<Step>
+
+### The record stays behind
+
+Every redemption writes an append-only `inviteUse` row, and accepted invites are permanent audit records: who invited whom, and who redeemed what.
+
+</Step>
+
+</Steps>
+
+## Email verification by design
+
+The two delivery types prove different things, and `emailVerified` follows the proof:
+
+- **Private invites** pre-create an inert, unverified user, locking the address. The link is never shown to its creator, so the token only ever exists in the recipient's mailbox; redeeming it is proof of mailbox access, and the email is marked **verified** on accept.
+- **Public invites** pre-create nothing. The accepter types their own email, and since holding a shared link proves nothing about a mailbox, the account is created **unverified**. The plugin sends Better Auth's standard verification email (when `sendOnSignUp` or `requireEmailVerification` is configured), and the user verifies by clicking it like any other signup.
+
+<Callout title="Recommended">
+  Keep `requireEmailVerification: true` in your `auth.ts` unless you want unverified users signing
+  in. With it, a public-invite accepter cannot sign in until they click the verification link;
+  private-invite accepters are already verified by the invite itself.
+</Callout>
+
+With that setting, the emailed link is the invitee's only way in, so this piece of `auth.ts` is load-bearing:
+
+```ts title="auth.ts"
+export const auth = betterAuth({
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail(user.email, "Verify your email", url);
+    },
+    sendOnSignUp: true // also fires for public-invite redemptions
+  },
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true // unverified users cannot sign in
+  }
+});
+```
+
+Redemption itself never signs anyone in: after `ACCEPTED`, the user signs in through your normal flow with the credentials they just set. See [The invite page](/docs/invite-page#redeeming). And when an invitation email goes missing, [`invite.resend`](/docs/invites#resending-an-invitation) invalidates the old link and delivers a fresh one.
+
+## The guarantees
+
+- **A database leak exposes no usable links.** Tokens are crypto-random and stored SHA-256 hashed; the raw token is never persisted.
+- **Exactly one winner.** All state changes are guarded atomic writes: parallel redemptions of a one-seat invite produce exactly one winner.
+- **No cron, nothing to sweep.** Expiry is derived from `expiresAt` at read time.
+- **Pending invites lock their email.** While a private invite is pending, its email is locked on every path: sign-in, sign-up, password reset, and OAuth linking are all blocked without leaking that the invite exists.
 
 <Callout type="warn" title="Role changes made outside this plugin do not merge">
   The union merge above applies only to roles granted through invite redemption. Better Auth stores
   multiple roles as one comma-separated string (for example `"user,org-creator"`), and other role
   writers replace that string wholesale. The admin plugin's `setRole` is the usual culprit: it
-  overwrites the field with exactly what you send, so calling it with just `"admin"` silently
-  strips roles the user gained through invites. When you change roles from your own admin UI,
-  always send the full set. See the
-  [recipe](/docs/recipes#changing-roles-without-losing-invite-granted-ones).
+  overwrites the field with exactly what you send, so calling it with just `"admin"` silently strips
+  roles the user gained through invites. When you change roles from your own admin UI, always send
+  the full set. See the [recipe](/docs/recipes#changing-roles-without-losing-invite-granted-ones).
 </Callout>
 
 ## Where to go next
 
 <Cards>
   <Card
+    icon={<Split />}
     title="The two modes"
     description="Invite-only and open, and how auto-detection picks one."
     href="/docs/modes"
   />
   <Card
+    icon={<Ticket />}
     title="Invites"
     description="Kinds, delivery types, and how to create each one."
     href="/docs/invites"

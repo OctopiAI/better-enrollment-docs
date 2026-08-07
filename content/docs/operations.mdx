@@ -1,16 +1,25 @@
 ---
 title: Operations at scale
 description: Cleanup, bulk operations, indexes, and shared rate limits.
+icon: Gauge
 ---
 
-- **Expired-invite cleanup** is batched: `POST /invite/cleanup-expired` (server-only) deletes in passes of `batchSize` (default 500, max 5000) until drained, so table size never dictates the request's memory or duration. Run it on a cron.
+## Expired-invite cleanup
 
-  ```ts
-  const { deleted } = await auth.api.cleanupExpiredInvites();
-  ```
+Cleanup is batched: `POST /invite/cleanup-expired` (server-only) deletes in passes of `batchSize` (default 500, max 5000) until drained, so table size never dictates the request's memory or duration. Run it on a cron.
 
-- **Bulk org operations** (`disableOrg` with `banMembers`, `deleteOrg`) read and delete in pages of 1000, so they stay within driver bind-parameter limits on orgs of any size.
+```ts
+const { deleted } = await auth.api.cleanupExpiredInvites();
+```
 
-- **Indexes**: the schema ships with single-column indexes on the hot columns, and large invite tables benefit from two composite ones. The [Database page](/docs/database#indexes) lists them and explains the migration caveat.
+## Bulk org operations
 
-- **Rate limits** ship with the plugin (5/min on redemption endpoints, 10/min on `get`/`check-slug`) but Better Auth stores counters in memory by default. If you run more than one instance, configure Better Auth's `rateLimit.storage` (for example `"secondary-storage"` with Redis) so the limits are shared instead of per-pod.
+`disableOrg` with `banMembers` and `deleteOrg` read and delete in pages of 1000, so they stay within driver bind-parameter limits on orgs of any size.
+
+## Indexes
+
+The schema ships with single-column indexes on the hot columns, and large invite tables benefit from two composite ones. The [Database page](/docs/database#indexes) lists them and explains the migration caveat.
+
+## Rate limits
+
+Limits ship with the plugin (5/min on redemption endpoints, 10/min on `get`/`check-slug`) but Better Auth stores counters in memory by default. If you run more than one instance, configure Better Auth's `rateLimit.storage` (for example `"secondary-storage"` with Redis) so the limits are shared instead of per-pod.

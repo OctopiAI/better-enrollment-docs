@@ -1,42 +1,109 @@
 ---
 title: Introduction
 description: What Better Enrollment is and what it gives you.
+icon: BookOpen
 ---
+
+import { InstallCommand } from "@/components/install-command";
+import {
+  Building2,
+  Download,
+  Link2,
+  Lock,
+  Mail,
+  PanelTop,
+  Plug,
+  Rocket,
+  ScrollText,
+  ShieldCheck,
+  Split,
+  UserPlus,
+  Users,
+  Workflow
+} from "lucide-react";
 
 Better Enrollment is a plugin for [Better Auth](https://www.better-auth.com) that makes invitations the front door of your app. Run fully invite-only, hand out shareable invite links, or use invites as role and organization grants in an open app.
 
+<InstallCommand className="mt-2" />
+
 ## Features
 
-- **Invite-only mode**: close every sign-up route and let people in only through invitations.
-- **Open mode**: invitations become role and organization grants for self-serve sign-ups.
-- **Private invites**: email-bound, single use, verified on accept.
-- **Public invites**: shareable links with use caps, expiry, and revocation.
-- **Organization onboarding**: one link joins an org, or lets the invitee found their own.
-- **Seat limits**: per-org caps with pending-invite reservations and subscription hooks.
-- **Security first**: hashed tokens, atomic race-safe redemption, no email oracles.
-- **Audit trail**: append-only record of who invited whom and who redeemed what.
-- **One redemption page**: a single `?token=` page and one `redeem` call handle every invite kind in both modes.
-- **Adapter-agnostic**: works with any Better Auth database adapter, no extra infrastructure.
+<Cards>
+  <Card
+    icon={<Lock />}
+    title="Invite-only mode"
+    description="Close every sign-up route and let people in only through invitations."
+  />
+  <Card
+    icon={<UserPlus />}
+    title="Open mode"
+    description="Invitations become role and organization grants for self-serve sign-ups."
+  />
+  <Card
+    icon={<Mail />}
+    title="Private invites"
+    description="Email-bound, single use, verified on accept."
+  />
+  <Card
+    icon={<Link2 />}
+    title="Public invites"
+    description="Shareable links with use caps, expiry, and revocation."
+  />
+  <Card
+    icon={<Building2 />}
+    title="Organization onboarding"
+    description="One link joins an org, or lets the invitee found their own."
+  />
+  <Card
+    icon={<Users />}
+    title="Seat limits"
+    description="Per-org caps with pending-invite reservations and subscription hooks."
+  />
+  <Card
+    icon={<ShieldCheck />}
+    title="Security first"
+    description="Hashed tokens, atomic race-safe redemption, no email oracles."
+  />
+  <Card
+    icon={<ScrollText />}
+    title="Audit trail"
+    description="Append-only record of who invited whom and who redeemed what."
+  />
+  <Card
+    icon={<PanelTop />}
+    title="One redemption page"
+    description="A single token page and one redeem call handle every invite kind in both modes."
+  />
+  <Card
+    icon={<Plug />}
+    title="Adapter-agnostic"
+    description="Works with any Better Auth database adapter, no extra infrastructure."
+  />
+</Cards>
 
 ## Get started
 
 <Cards>
   <Card
+    icon={<Download />}
     title="Installation"
     description="Add the package and generate the schema."
     href="/docs/installation"
   />
   <Card
+    icon={<Rocket />}
     title="Quick Start"
     description="Server and client setup, then your first invite."
     href="/docs/quick-start"
   />
   <Card
+    icon={<Workflow />}
     title="How it works"
     description="The lifecycle of an invitation, from create to redeem."
     href="/docs/how-it-works"
   />
   <Card
+    icon={<Split />}
     title="The two modes"
     description="Invite-only and open, and how auto-detection picks one."
     href="/docs/modes"

@@ -1,33 +1,79 @@
 ---
 title: Installation
 description: Add Better Enrollment to your project and generate the schema.
+icon: Download
 ---
 
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
+import { BunIcon, NpmIcon, PnpmIcon, YarnIcon } from "@/components/icons";
+
+<Steps>
+
+<Step>
 
 ## Install the package
 
-<Tabs groupId="package-manager" persist items={['npm', 'pnpm', 'yarn', 'bun']}>
+<Tabs groupId="package-manager" persist defaultValue="npm">
 
-```bash tab="npm"
+<TabsList>
+  <TabsTrigger value="npm">
+    <NpmIcon />
+    npm
+  </TabsTrigger>
+  <TabsTrigger value="pnpm">
+    <PnpmIcon />
+    pnpm
+  </TabsTrigger>
+  <TabsTrigger value="yarn">
+    <YarnIcon />
+    yarn
+  </TabsTrigger>
+  <TabsTrigger value="bun">
+    <BunIcon />
+    bun
+  </TabsTrigger>
+</TabsList>
+
+<Tab value="npm">
+
+```bash
 npm install @octopi-ai/better-enrollment
 ```
 
-```bash tab="pnpm"
+</Tab>
+
+<Tab value="pnpm">
+
+```bash
 pnpm add @octopi-ai/better-enrollment
 ```
 
-```bash tab="yarn"
+</Tab>
+
+<Tab value="yarn">
+
+```bash
 yarn add @octopi-ai/better-enrollment
 ```
 
-```bash tab="bun"
+</Tab>
+
+<Tab value="bun">
+
+```bash
 bun add @octopi-ai/better-enrollment
 ```
+
+</Tab>
 
 </Tabs>
 
 Requires `better-auth >= 1.4.0` and `zod >= 4`.
+
+</Step>
+
+<Step>
 
 ## Generate the schema
 
@@ -47,3 +93,7 @@ This creates the `invite` and `inviteUse` tables. When organization features are
   it, the plugin warns at startup and you must gate management with `adminUserIds` or
   `canManageInvites` instead.
 </Callout>
+
+</Step>
+
+</Steps>

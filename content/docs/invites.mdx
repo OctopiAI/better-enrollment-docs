@@ -1,7 +1,10 @@
 ---
 title: Invites
 description: Invite kinds, delivery types, and how to create each one.
+icon: Ticket
 ---
+
+import { Building2, PanelTop } from "lucide-react";
 
 Two choices define every invite: what it grants (`kind`) and how it travels (`type`). Everything else resolves server-side.
 
@@ -83,6 +86,20 @@ await auth.api.createInvite({
 
 A public `org-join` invite is a shareable join link for one org (in a seat-limited org `maxUses` is required). A public `org-create` invite founds a separate organization per use.
 
+## Resending an invitation
+
+When an invitation email goes missing, or a pending invite has expired, resend it. One call works for every kind and delivery type; the server rebuilds the right invite under the hood:
+
+```ts
+await authClient.invite.resend({ inviteId });
+// private -> { inviteId, expiresAt }, new link emailed by your sendPrivateInvitation
+// public  -> { inviteId, expiresAt, token, url }, the fresh link returned once
+```
+
+Resending mints a new token and a fresh expiry on the same invite row, so the previous link is invalidated the moment the call succeeds. Everything else is preserved: the invitee, roles, org and team bindings, remaining uses on a public invite, the seat reservation, and the audit history. An expired pending invite is revived with a new expiry, which is also the release valve for a locked email without deleting the invite.
+
+Permissions mirror creation: app admins resend `app` and `org-create` invites (and act as a moderation backstop), org members with `invitation: ["create"]` resend their org's `org-join` invites. Accepted and revoked invites cannot be resent, and reviving an expired `org-join` invite re-checks the seat limit, since its reservation had been released.
+
 ## Inviting someone who already has an account
 
 This works out of the box for org kinds: the invite becomes an activation invite, the invitee signs in and confirms, and redemption merges roles and membership instead of creating a user. A plain `app` invite to an existing email is rejected with `USER_ALREADY_EXISTS`, since it grants nothing an existing user lacks.
@@ -106,10 +123,27 @@ export const auth = betterAuth({
 });
 ```
 
-The accepter still gets a session immediately; they verify by clicking the emailed link like any other signup.
+Redemption never signs the accepter in, so with `requireEmailVerification` an unverified public accepter cannot enter at all until they click the emailed link; without it, they sign in normally and verify afterwards.
 
 <Callout type="warn">
   Set `autoVerifyPublicInviteEmail: true` only when you skip that flow entirely (internal tools,
   trusted environments). It marks public-invite users verified on the spot, which means anyone
   holding the link can register an address they do not own.
 </Callout>
+
+## Where to go next
+
+<Cards>
+  <Card
+    icon={<PanelTop />}
+    title="The invite page"
+    description="One page and one redeem call handle every invite kind."
+    href="/docs/invite-page"
+  />
+  <Card
+    icon={<Building2 />}
+    title="Organizations"
+    description="Org invites, seat limits, and platform controls."
+    href="/docs/organizations"
+  />
+</Cards>

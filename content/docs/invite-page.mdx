@@ -1,9 +1,11 @@
 ---
 title: The invite page
 description: One page and one redeem call handle every invite kind.
+icon: PanelTop
 ---
 
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
+import { Building2, Lock, TriangleAlert, UserPlus } from "lucide-react";
 
 Every invitation link points at the same page, carrying only `?token=`. The invitee never needs to know what kind of invite they hold.
 
@@ -24,15 +26,26 @@ const { data: invite } = await authClient.invite.get({ token });
 
 ### What your page will see
 
-<Tabs groupId="mode" persist items={['Invite-only (closed app)', 'Open sign-up']}>
+<Tabs groupId="enrollment-mode" persist defaultValue="invite-only">
 
-<Tab value="Invite-only (closed app)">
+<TabsList>
+  <TabsTrigger value="invite-only">
+    <Lock />
+    Invite-only (closed app)
+  </TabsTrigger>
+  <TabsTrigger value="open-signup">
+    <UserPlus />
+    Open sign-up
+  </TabsTrigger>
+</TabsList>
+
+<Tab value="invite-only">
 
 Invitees have no account, so live invites always return `nextAction: "SIGN_UP"`: your page is a sign-up form driven by `requiredFields`. You only ever handle two states, `SIGN_UP` and `null`.
 
 </Tab>
 
-<Tab value="Open sign-up">
+<Tab value="open-signup">
 
 Invitees are normal users, so live invites return `"SIGN_IN"` (no session; show your sign-in form and keep the token in the URL) or `"CONFIRM"` (signed in; show one confirm button). `SIGN_UP` never appears in open mode.
 
@@ -53,12 +66,37 @@ await authClient.invite.redeem({
   organizationName,
   organizationSlug
 });
-// -> { status: "ACCEPTED", user, organization? }
+// -> { action: "ACCEPTED", organization? }
 ```
 
 `redeem` routes to the right semantics for the mode and kind, so your page never branches. The response says what happened, so you can render "You joined Acme" or "Your organization is ready".
+
+Redemption never creates a session. After `ACCEPTED` in the sign-up flow, your page already holds the email and password it just collected, so sign the user in with them:
+
+```ts
+await authClient.signIn.email({ email, password });
+```
+
+In the `CONFIRM` flow the user was already signed in, and nothing about their session (including the active organization) is changed; switching to a newly joined org is your call.
 
 <Callout title="A deliberately thin payload">
   `invite.get` returns only kind, role, derived status, expiry, uses remaining, and a masked email
   such as `a***@example.com`. Never the inviter's identity or internal ids.
 </Callout>
+
+## Where to go next
+
+<Cards>
+  <Card
+    icon={<Building2 />}
+    title="Organizations"
+    description="Org invites, seat limits, and platform controls."
+    href="/docs/organizations"
+  />
+  <Card
+    icon={<TriangleAlert />}
+    title="Error codes"
+    description="Every APIError code the plugin can return."
+    href="/docs/errors"
+  />
+</Cards>

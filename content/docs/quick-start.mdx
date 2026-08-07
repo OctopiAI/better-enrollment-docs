@@ -1,10 +1,21 @@
 ---
 title: Quick Start
 description: Set up Better Enrollment step by step, for a closed app or open sign-up.
+icon: Rocket
 ---
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
+import {
+  Building2,
+  Lock,
+  Monitor,
+  PanelTop,
+  Server,
+  Settings2,
+  Ticket,
+  UserPlus
+} from "lucide-react";
 
 Better Enrollment runs in one of two modes, and the setup flow is the same for both; only your auth config differs. Pick your path once and the examples on this page follow it:
 
@@ -19,9 +30,20 @@ Better Enrollment runs in one of two modes, and the setup flow is the same for b
 
 Import `betterEnrollment` and add it to your `betterAuth` plugins.
 
-<Tabs groupId="mode" persist items={['Invite-only (closed app)', 'Open sign-up']}>
+<Tabs groupId="enrollment-mode" persist defaultValue="invite-only">
 
-<Tab value="Invite-only (closed app)">
+<TabsList>
+  <TabsTrigger value="invite-only">
+    <Lock />
+    Invite-only (closed app)
+  </TabsTrigger>
+  <TabsTrigger value="open-signup">
+    <UserPlus />
+    Open sign-up
+  </TabsTrigger>
+</TabsList>
+
+<Tab value="invite-only">
 
 Sign-up stays disabled; the plugin sees the fully closed config and auto-detects invite-only mode. Users can only come in through an invitation.
 
@@ -48,7 +70,7 @@ export const auth = betterAuth({
 
 </Tab>
 
-<Tab value="Open sign-up">
+<Tab value="open-signup">
 
 Sign-up stays open; the plugin sees the open config and auto-detects open mode. Invitations become grants: redeeming one merges the invited role and any organization membership into the user's account.
 
@@ -121,11 +143,36 @@ export const authClient = createAuthClient({
 
 ## Create your first invite
 
-Invites are created by an admin (or an org member with permission). Create them from your server, or from an admin dashboard with the client:
+Invites are created by an admin (or an org member with permission). Create them from an admin dashboard with the client, or from your server:
 
-<Tabs groupId="env" persist items={['Server', 'Client']}>
+<Tabs groupId="env" persist defaultValue="client">
 
-<Tab value="Server">
+<TabsList>
+  <TabsTrigger value="client">
+    <Monitor />
+    Client
+  </TabsTrigger>
+  <TabsTrigger value="server">
+    <Server />
+    Server
+  </TabsTrigger>
+</TabsList>
+
+<Tab value="client">
+
+```ts title="admin-dashboard.ts"
+// Requires the signed-in user to pass the admin gate
+await authClient.invite.create({
+  type: "private",
+  email: "ada@example.com",
+  name: "Ada",
+  role: "user"
+});
+```
+
+</Tab>
+
+<Tab value="server">
 
 ```ts title="invite.ts"
 // Private: bound to one email, delivered by your sendPrivateInvitation
@@ -141,20 +188,6 @@ await auth.api.createInvite({
   headers
 });
 // -> { inviteId, expiresAt, token, url }
-```
-
-</Tab>
-
-<Tab value="Client">
-
-```ts title="admin-dashboard.ts"
-// Requires the signed-in user to pass the admin gate
-await authClient.invite.create({
-  type: "private",
-  email: "ada@example.com",
-  name: "Ada",
-  role: "user"
-});
 ```
 
 </Tab>
@@ -183,7 +216,10 @@ const { data: invite } = await authClient.invite.get({ token });
 
 // 3. Submit to one endpoint
 await authClient.invite.redeem({ token, password, name, email });
-// -> { status: "ACCEPTED", user, organization? }
+// -> { action: "ACCEPTED", organization? }
+
+// 4. Sign them in; redemption never creates a session
+await authClient.signIn.email({ email, password });
 ```
 
 The full rendering table and `requiredFields` reference are on [The invite page](/docs/invite-page).
@@ -194,15 +230,26 @@ The full rendering table and `requiredFields` reference are on [The invite page]
 
 ## What redemption does
 
-<Tabs groupId="mode" persist items={['Invite-only (closed app)', 'Open sign-up']}>
+<Tabs groupId="enrollment-mode" persist defaultValue="invite-only">
 
-<Tab value="Invite-only (closed app)">
+<TabsList>
+  <TabsTrigger value="invite-only">
+    <Lock />
+    Invite-only (closed app)
+  </TabsTrigger>
+  <TabsTrigger value="open-signup">
+    <UserPlus />
+    Open sign-up
+  </TabsTrigger>
+</TabsList>
 
-The invitee has no account, so `invite.get` returns `nextAction: "SIGN_UP"`. Redeeming creates the user, their credential account, and a session in one atomic step: they land signed in with the invited role.
+<Tab value="invite-only">
+
+The invitee has no account, so `invite.get` returns `nextAction: "SIGN_UP"`. Redeeming creates the user and their credential account in one atomic step. No session is created, you should sign them in right after, via your application's designated login flow.".
 
 </Tab>
 
-<Tab value="Open sign-up">
+<Tab value="open-signup">
 
 The invitee signs up or signs in normally first (`nextAction: "SIGN_IN"`, or `"CONFIRM"` when already signed in). Redeeming merges the invited role and any organization membership into their existing account; roles merge as a union, so an invite can never demote anyone.
 
@@ -218,21 +265,25 @@ The invitee signs up or signs in normally first (`nextAction: "SIGN_IN"`, or `"C
 
 <Cards>
   <Card
+    icon={<Ticket />}
     title="Invites"
     description="Kinds, delivery types, and how to create each one."
     href="/docs/invites"
   />
   <Card
+    icon={<PanelTop />}
     title="The invite page"
     description="Rendering by nextAction and the redeem call."
     href="/docs/invite-page"
   />
   <Card
+    icon={<Building2 />}
     title="Organizations"
     description="Org invites, seat limits, and platform controls."
     href="/docs/organizations"
   />
   <Card
+    icon={<Settings2 />}
     title="Options"
     description="Every option betterEnrollment accepts, with defaults."
     href="/docs/options"

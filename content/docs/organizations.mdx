@@ -1,7 +1,10 @@
 ---
 title: Organizations
 description: Org invites, seat limits, and platform controls.
+icon: Building2
 ---
+
+import { Settings2, ShieldCheck } from "lucide-react";
 
 Org features switch on when the organization plugin is detected. Pass the same `ac` and `roles` objects you gave the org plugin:
 
@@ -25,7 +28,14 @@ plugins: [
 ],
 ```
 
-Redeeming an org invite writes the member row (and team membership when `teamId` is set) in the same flow that creates the account, then sets the session's active organization. Redemption re-validates everything, since state drifts between create and accept.
+Redeeming an org invite writes the member row (and team membership when `teamId` is set) in the same flow that creates the account. Redemption re-validates everything, since state drifts between create and accept.
+
+<Callout type="info" title="Active organization is a product decision">
+  After an `org-join` or `org-create` invite is redeemed, the plugin does not select an active
+  organization. Whether to switch the user into the new org automatically at sign-in or let them
+  pick through an org switcher is your app's call: set it with the org plugin's `setActive` where it
+  fits your flow.
+</Callout>
 
 ## Seat limits
 
@@ -58,3 +68,22 @@ await authClient.invite.org.delete({ organizationId });
 | Seat limits, disable, delete org   | Yes                 | No                 | No                              | No           |
 
 App admins come from `adminRoles` (default `["admin"]`), `adminUserIds`, or your own `canManageInvites(user)` callback. Org permissions are the org plugin's own access control. Cross-org calls return `FORBIDDEN`, and unknown org ids look identical so they cannot be enumerated.
+
+One actor sits outside this table: trusted server code. The server-only [`createSystemInvite`](/docs/api#server-only) endpoint can create any invite kind, including `org-join`, without a session or org membership; seat limits, disabled-org checks, and the `allowOwnerInvites` switch still apply. System invites store `createdByUserId` as null and a self-declared inviter, so they remain distinguishable from member-created invites in the audit trail, but their attribution is only as trustworthy as the code that called the endpoint.
+
+## Where to go next
+
+<Cards>
+  <Card
+    icon={<Settings2 />}
+    title="Options"
+    description="Every option betterEnrollment accepts, with defaults."
+    href="/docs/options"
+  />
+  <Card
+    icon={<ShieldCheck />}
+    title="Security"
+    description="What is blocked, why, and how tokens are stored."
+    href="/docs/security"
+  />
+</Cards>

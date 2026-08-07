@@ -129,11 +129,10 @@ export function DocsOG({ title, description }: { title: string; description?: st
           <div style={{ display: "flex", fontSize: 30, color: gray }}>Docs</div>
         </div>
 
-        <div style={{ display: "flex", flexGrow: 1 }} />
-
         <div
           style={{
             display: "flex",
+            marginTop: 96,
             fontSize: 76,
             fontWeight: 800,
             letterSpacing: "-0.03em",
@@ -159,7 +158,7 @@ export function DocsOG({ title, description }: { title: string; description?: st
           </div>
         ) : null}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 56 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 40 }}>
           <div style={{ display: "flex", width: 12, height: 12, backgroundColor: purple }} />
           <div
             style={{
@@ -173,6 +172,9 @@ export function DocsOG({ title, description }: { title: string; description?: st
             AN INVITE PLUGIN FOR BETTER AUTH
           </div>
         </div>
+
+        {/* keep the text block pinned to the top, clear of the waves */}
+        <div style={{ display: "flex", flexGrow: 1 }} />
       </div>
     </Frame>
   );

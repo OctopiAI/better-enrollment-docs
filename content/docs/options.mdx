@@ -1,15 +1,28 @@
 ---
 title: Options
 description: Every option betterEnrollment accepts, with defaults.
+icon: Settings2
 ---
+
+Every option `betterEnrollment` accepts, grouped by concern. The values shown are the defaults.
+
+## Mode
 
 ```ts title="auth.ts"
 betterEnrollment({
-  // Mode
   mode: "auto", // "auto" | "invite-only" | "open"
-  allowOpenSignup: false,
+  allowOpenSignup: false
+});
+```
 
-  // Delivery. Implementations are yours; the plugin never sends mail.
+`mode: "auto"` inspects your config at startup and picks the right mode; a mixed config throws and asks you to set `mode` explicitly. `allowOpenSignup: true` downgrades the open-sign-up-path error in invite-only mode to a warning, making the guarantee per-email. See [The two modes](/docs/modes).
+
+## Delivery
+
+Implementations are yours; the plugin never sends mail.
+
+```ts title="auth.ts"
+betterEnrollment({
   async sendPrivateInvitation({
     email,
     name,
@@ -34,31 +47,65 @@ betterEnrollment({
     organizationName,
     maxUses,
     expiresAt
-  }) {},
+  }) {}
+});
+```
 
-  // Roles
+## Roles
+
+```ts title="auth.ts"
+betterEnrollment({
   validRoles: ["user", "admin"], // omit to skip validation
   fallbackRole: undefined, // used when an invited role was deleted
-  defaultRole: "user",
+  defaultRole: "user"
+});
+```
 
-  // Lifetime and usage
+## Lifetime and usage
+
+```ts title="auth.ts"
+betterEnrollment({
   expiresIn: 60 * 60 * 24 * 7, // private invites, in seconds
-  publicExpiresIn: 60 * 60 * 24 * 7, // public invites; null = never
+  publicExpiresIn: 60 * 60 * 24 * 7 // public invites; null = never
+});
+```
 
-  // Security posture
+## Security posture
+
+```ts title="auth.ts"
+betterEnrollment({
   hashTokens: true,
-  autoVerifyPublicInviteEmail: false, // see "Verifying public-invite emails"
-  exposeEmailOnGet: false,
+  autoVerifyPublicInviteEmail: false,
+  exposeEmailOnGet: false
+});
+```
 
-  // Who may manage invitations
+`autoVerifyPublicInviteEmail` and its trade-offs are covered in [Verifying public-invite emails](/docs/invites#verifying-public-invite-emails). By default `invite.get` returns a masked email such as `a***@example.com`; see [The invite page](/docs/invite-page).
+
+## Who may manage invitations
+
+```ts title="auth.ts"
+betterEnrollment({
   adminRoles: ["admin"],
   adminUserIds: [],
-  canManageInvites: undefined, // (user) => boolean, replaces the two above
+  canManageInvites: undefined // (user) => boolean, replaces the two above
+});
+```
 
-  // Links
-  buildInviteUrl: ({ token, type, mode }) => `https://app.example.com/invite?token=${token}`,
+## Links
 
-  // Organizations
+```ts title="auth.ts"
+betterEnrollment({
+  buildInviteUrl: ({ token, type, mode }) => `https://app.example.com/invite?token=${token}`
+});
+```
+
+## Organizations
+
+Pass the same `ac` and `roles` objects you gave the organization plugin; the whole group is covered on [Organizations](/docs/organizations).
+
+```ts title="auth.ts"
+betterEnrollment({
   organization: {
     ac,
     roles, // the same objects given to the org plugin
@@ -74,9 +121,14 @@ betterEnrollment({
     onOrgDisabled,
     onOrgEnabled,
     onOrgDeleted
-  },
+  }
+});
+```
 
-  // Lifecycle hooks
+## Lifecycle hooks
+
+```ts title="auth.ts"
+betterEnrollment({
   onInviteCreated,
   onInviteAccepted,
   onInviteRevoked,

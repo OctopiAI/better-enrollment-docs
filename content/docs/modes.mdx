@@ -1,9 +1,11 @@
 ---
 title: The two modes
 description: Invite-only and open, and how auto-detection picks one.
+icon: Split
 ---
 
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
+import { Lock, Rocket, Ticket, UserPlus } from "lucide-react";
 
 Better Enrollment's `mode` accepts `"auto"` (default), `"invite-only"`, or `"open"`. In `auto` the plugin inspects your config at startup: everything closed means invite-only, everything open means open, and a mixed config throws with a message naming each path, asking you to set `mode` explicitly.
 
@@ -17,9 +19,20 @@ Better Enrollment's `mode` accepts `"auto"` (default), `"invite-only"`, or `"ope
 
 ## The two configurations
 
-<Tabs groupId="mode" persist items={['Invite-only (closed app)', 'Open sign-up']}>
+<Tabs groupId="enrollment-mode" persist defaultValue="invite-only">
 
-<Tab value="Invite-only (closed app)">
+<TabsList>
+  <TabsTrigger value="invite-only">
+    <Lock />
+    Invite-only (closed app)
+  </TabsTrigger>
+  <TabsTrigger value="open-signup">
+    <UserPlus />
+    Open sign-up
+  </TabsTrigger>
+</TabsList>
+
+<Tab value="invite-only">
 
 All sign-up routes are disabled and the plugin creates users through Better Auth's internal adapter. Setting it explicitly while a sign-up path is still open throws at init; `allowOpenSignup: true` downgrades that to a warning, and the guarantee becomes per-email: pending invites still lock their own address while everyone else signs up freely.
 
@@ -33,7 +46,7 @@ plugins: [admin(), betterEnrollment({ /* ... */ })],
 
 </Tab>
 
-<Tab value="Open sign-up">
+<Tab value="open-signup">
 
 Anyone signs up normally, and redeeming an invite merges the invited role and any org membership into their existing account.
 
@@ -45,3 +58,20 @@ plugins: [admin(), betterEnrollment({ /* ... */ })],
 </Tab>
 
 </Tabs>
+
+## Where to go next
+
+<Cards>
+  <Card
+    icon={<Ticket />}
+    title="Invites"
+    description="Kinds, delivery types, and how to create each one."
+    href="/docs/invites"
+  />
+  <Card
+    icon={<Rocket />}
+    title="Quick Start"
+    description="Set up Better Enrollment step by step, for a closed app or open sign-up."
+    href="/docs/quick-start"
+  />
+</Cards>
