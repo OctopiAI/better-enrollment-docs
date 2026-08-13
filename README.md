@@ -5,10 +5,10 @@
 
 <div align="center">
 
-![](https://shields.octopi.ai/github/last-commit/FalconiZzare/better-enrollment-docs?&style=for-the-badge&color=8ad7eb&logo=git&logoColor=D9E0EE&labelColor=1E202B)
-![](https://shields.octopi.ai/github/stars/FalconiZzare/better-enrollment-docs?style=for-the-badge&logo=andela&color=86dbd7&logoColor=D9E0EE&labelColor=1E202B)
-![](https://shields.octopi.ai/github/repo-size/FalconiZzare/better-enrollment-docs?color=86dbce&label=SIZE&logo=protondrive&style=for-the-badge&logoColor=D9E0EE&labelColor=1E202B)
-![](https://shields.octopi.ai/github/forks/FalconiZzare/better-enrollment-docs?color=86dbce&label=FORKS&logo=forgejo&style=for-the-badge&logoColor=D9E0EE&labelColor=1E202B)
+![](https://shields.octopi.ai/github/last-commit/OctopiAI/better-enrollment-docs?&style=for-the-badge&color=8ad7eb&logo=git&logoColor=D9E0EE&labelColor=1E202B)
+![](https://shields.octopi.ai/github/stars/OctopiAI/better-enrollment-docs?style=for-the-badge&logo=andela&color=86dbd7&logoColor=D9E0EE&labelColor=1E202B)
+![](https://shields.octopi.ai/github/repo-size/OctopiAI/better-enrollment-docs?color=86dbce&label=SIZE&logo=protondrive&style=for-the-badge&logoColor=D9E0EE&labelColor=1E202B)
+![](https://shields.octopi.ai/github/forks/OctopiAI/better-enrollment-docs?color=86dbce&label=FORKS&logo=forgejo&style=for-the-badge&logoColor=D9E0EE&labelColor=1E202B)
 
 </div>
 
@@ -20,7 +20,7 @@
   ·
   <a href="https://github.com/OctopiAI/better-enrollment">Plugin repo</a>
   ·
-  <a href="https://github.com/FalconiZzare/better-enrollment-docs/issues">Issues</a>
+  <a href="https://github.com/OctopiAI/better-enrollment-docs/issues">Issues</a>
 </p>
 
 <p align="center">
