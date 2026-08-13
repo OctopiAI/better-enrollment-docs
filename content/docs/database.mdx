@@ -210,6 +210,10 @@ export const organizationFields = [
 
 <DatabaseTable name="organization" fields={organizationFields} />
 
+## user (extension)
+
+Each configured [additional field](/docs/options#additional-fields) becomes a column on the user table, named after the field and typed by its `type`. Columns are always nullable: pre-created and open-mode users exist before redemption collects a value, so requiredness is enforced by the redeem flow rather than the database.
+
 ## Indexes
 
 The schema indexes `email`, `organizationId`, `tokenHash` (unique), `status`, `expiresAt`, and `createdByUserId`. If your invite table grows into the millions, consider adding composite indexes `(email, status)` and `(organizationId, status)` in your own migrations; Better Auth's schema DSL only expresses single-column indexes.

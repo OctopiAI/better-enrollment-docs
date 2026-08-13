@@ -32,11 +32,14 @@ import { INVITE_ERROR_CODES } from "@octopi-ai/better-enrollment";
 
 ## Redemption guards
 
-| Code                 | When                                                  |
-| -------------------- | ----------------------------------------------------- |
-| `EMAIL_MISMATCH`     | Open-mode activation guard: the emails do not match   |
-| `EMAIL_NOT_VERIFIED` | Open-mode activation guard: the email is not verified |
-| `USER_BANNED`        | Banned accounts cannot redeem                         |
+| Code                        | When                                                                      |
+| --------------------------- | ------------------------------------------------------------------------- |
+| `EMAIL_MISMATCH`            | Open-mode activation guard: the emails do not match                       |
+| `EMAIL_NOT_VERIFIED`        | Open-mode activation guard: the email is not verified                     |
+| `USER_BANNED`               | Banned accounts cannot redeem                                             |
+| `NAME_REQUIRED`             | Sign-up redemption without a name                                         |
+| `ADDITIONAL_FIELD_REQUIRED` | A required [additional field](/docs/options#additional-fields) is missing |
+| `ADDITIONAL_FIELD_INVALID`  | An additional field failed its type check or validator                    |
 
 ## Organizations
 
