@@ -2,6 +2,7 @@
 title: Options
 description: Every option betterEnrollment accepts, with defaults.
 icon: Settings2
+status: updated
 ---
 
 Every option `betterEnrollment` accepts, grouped by concern. The values shown are the defaults.
@@ -81,6 +82,28 @@ betterEnrollment({
 ```
 
 `autoVerifyPublicInviteEmail` and its trade-offs are covered in [Verifying public-invite emails](/docs/invites#verifying-public-invite-emails). By default `invite.get` returns a masked email such as `a***@example.com`; see [The invite page](/docs/invite-page).
+
+## Additional fields [!new]
+
+Extra profile fields collected at redemption, declared like Better Auth's `user.additionalFields`:
+
+```ts title="auth.ts"
+betterEnrollment({
+  additionalFields: {
+    department: { type: "string" }, // required by default, collected at sign-up
+    referral: { type: "string", required: false },
+    seniority: { type: "number", validator: { input: z.number().min(0) } }, // zod works
+    plan: { type: "string", defaultValue: "free" }, // a default makes it optional
+    team: { type: "string", actions: ["SIGN_UP", "CONFIRM"] } // also on confirm
+  }
+});
+```
+
+- **Steps**: of the four next actions, `SIGN_IN` and the terminal state collect nothing. `SIGN_UP` and `CONFIRM` are forms, and `actions` (default `["SIGN_UP"]`) picks which of them collect the field. The list is exact, never additive: `["CONFIRM"]` means confirm only, so name both steps (`["SIGN_UP", "CONFIRM"]`) to collect a field on both forms.
+- **Storage**: each field becomes a nullable column on the user model; run `migrate` or `generate` after configuring, and do not also declare it under `user.additionalFields`. Requiredness is enforced at redemption, not by the database.
+- **Validation**: a missing required field, wrong type, or failing validator rejects with `ADDITIONAL_FIELD_REQUIRED` / `ADDITIONAL_FIELD_INVALID` before the invite is consumed.
+- **No clobbering**: on `CONFIRM` the update targets an existing account, so `defaultValue` is never applied there.
+- **Rendering**: `invite.get` lists the step's fields in `requiredFields` / `optionalFields`, with a `{ type, required }` map in `additionalFields`; see [The invite page](/docs/invite-page).
 
 ## Who may manage invitations
 

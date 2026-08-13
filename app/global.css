@@ -169,3 +169,52 @@ html > body[data-scroll-locked] {
   margin-right: 0 !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/*
+ * Section status badges: `## Heading [!new]` injects a childless
+ * <span data-heading-status="new"> into the heading (and the TOC copies
+ * it), and the visible label is drawn here from the attribute. Keep the
+ * status list in sync with PAGE_STATUSES in lib/shared.ts.
+ */
+[data-heading-status] {
+  --status-color: var(--muted-foreground);
+}
+[data-heading-status]::after {
+  content: attr(data-heading-status);
+  display: inline-block;
+  margin-inline-start: 0.5em;
+  border: 1px solid color-mix(in srgb, var(--status-color) 40%, transparent);
+  background: color-mix(in srgb, var(--status-color) 10%, transparent);
+  color: var(--status-color);
+  padding-inline: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+[data-heading-status="new"] {
+  --status-color: var(--primary);
+}
+[data-heading-status="updated"] {
+  --status-color: var(--color-emerald-600, #059669);
+}
+[data-heading-status="beta"] {
+  --status-color: var(--color-sky-600, #0284c7);
+}
+[data-heading-status="experimental"] {
+  --status-color: var(--color-orange-500, #f97316);
+}
+[data-heading-status="deprecated"] {
+  --status-color: var(--destructive);
+}
+.dark [data-heading-status="updated"] {
+  --status-color: var(--color-emerald-400, #34d399);
+}
+.dark [data-heading-status="beta"] {
+  --status-color: var(--color-sky-400, #38bdf8);
+}
+.dark [data-heading-status="experimental"] {
+  --status-color: var(--color-orange-400, #fb923c);
+}

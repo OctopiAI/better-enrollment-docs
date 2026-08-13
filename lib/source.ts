@@ -1,13 +1,20 @@
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
-import { docsContentRoute, docsImageRoute, docsRoute } from "./shared";
+import { statusBadgesPlugin } from "fumadocs-core/source/status-badges";
+import { docsContentRoute, docsImageRoute, docsRoute, PAGE_STATUSES } from "./shared";
 import { defineDocs } from "fumadocs-mdx/macro";
 import { metaSchema, pageSchema } from "fumadocs-core/source/schema";
+import { renderStatusBadge } from "@/components/status-badge";
+import * as z from "zod";
 
 const docs = defineDocs({
   dir: "content/docs",
   docs: {
-    schema: pageSchema,
+    // `status: new | updated | beta | experimental | deprecated` in a
+    // page's frontmatter renders a badge next to its sidebar entry.
+    schema: pageSchema.extend({
+      status: z.enum(PAGE_STATUSES).optional()
+    }),
     postprocess: {
       includeProcessedMarkdown: true
     }
@@ -21,7 +28,7 @@ const docs = defineDocs({
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
-  plugins: [lucideIconsPlugin()]
+  plugins: [lucideIconsPlugin(), statusBadgesPlugin({ renderBadge: renderStatusBadge })]
 });
 
 export function getPageImageUrl(page: (typeof source)["$inferPage"]) {

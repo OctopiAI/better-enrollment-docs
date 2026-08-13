@@ -12,3 +12,10 @@ export const gitConfig = {
   repo: "better-enrollment",
   branch: "main"
 };
+
+/**
+ * Valid values for the `status` page frontmatter field, rendered as a
+ * sidebar badge next to the page title (like Better Auth's "New" tags).
+ */
+export const PAGE_STATUSES = ["new", "updated", "beta", "experimental", "deprecated"] as const;
+export type PageStatus = (typeof PAGE_STATUSES)[number];

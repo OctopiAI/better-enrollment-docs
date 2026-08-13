@@ -35,9 +35,11 @@ Who may call these is covered in [Who can do what](/docs/organizations#who-can-d
 Kept for compatibility; `invite.redeem` routes to the right one for you:
 
 ```ts
-authClient.invite.accept({ token, password, name?, email? });
+authClient.invite.accept({ token, password, name, email? });
 authClient.invite.activate({ token });
 ```
+
+`accept` requires `name` (it is the flow that populates the profile) and carries the `SIGN_UP`-step [additional fields](/docs/options#additional-fields); `activate` acts on an existing account, takes no name, and carries the `CONFIRM`-step additional fields.
 
 ### Organization administration
 
