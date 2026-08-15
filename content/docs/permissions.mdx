@@ -1,0 +1,150 @@
+---
+title: Permissions
+description: Who may manage invitations, with or without an access-control file.
+icon: KeyRound
+status: new
+---
+
+import { Settings2, Building2 } from "lucide-react";
+
+Every management endpoint checks a permission before it runs. Two systems can answer that check; pick by what your app already has:
+
+| Your setup                               | Pass to `betterEnrollment()`                     | Covered in                                    |
+| ---------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| Admin plugin with an access-control file | the same `ac` and `roles`                        | [Shared AC file](#shared-ac-file)             |
+| Admin plugin, default roles only         | just `ac`, or nothing                            | [Only ac, no roles](#only-ac-no-roles)        |
+| No access-control file                   | `adminRoles`, `adminUserIds`, `canManageInvites` | [Standalone options](#standalone-options)     |
+| Organization plugin                      | its `ac` and `roles` under `organization`        | [Organization invites](#organization-invites) |
+
+## How the gate is chosen
+
+For app-level invites, the first match wins:
+
+1. `adminUserIds` always bypasses, in both systems
+2. `roles` or `ac` set: the access-control check decides, nothing else runs
+3. `canManageInvites` set: your callback decides
+4. `adminRoles` (default `["admin"]`)
+
+`org-join` invites are never gated by app adminship; the org's own permissions decide, see [Organization invites](#organization-invites).
+
+## App invites
+
+### Shared AC file
+
+Recommended when you use the admin plugin. Add the `invite` resource to the statement object you already built for it, then hand the same `ac` and `roles` to this plugin. Change a role in one place and it changes everywhere.
+
+```ts title="permissions.ts"
+import { createAccessControl } from "better-auth/plugins/access";
+import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
+import { inviteStatements, inviteAdminAc } from "@octopi-ai/better-enrollment";
+
+export const statement = {
+  ...defaultStatements, // admin plugin resources (user, session)
+  ...inviteStatements // adds: invite
+} as const;
+
+export const ac = createAccessControl(statement);
+
+export const admin = ac.newRole({
+  ...adminAc.statements, // full admin plugin permissions
+  ...inviteAdminAc.statements // full invite permissions
+});
+
+export const support = ac.newRole({
+  user: ["get", "list"],
+  invite: ["create", "list"] // may invite and see invites, nothing else
+});
+```
+
+```ts title="auth.ts"
+import { admin as adminPlugin } from "better-auth/plugins";
+import { betterEnrollment } from "@octopi-ai/better-enrollment";
+import { ac, admin, support } from "./permissions";
+
+plugins: [
+  adminPlugin({ ac, roles: { admin, support } }),
+  betterEnrollment({ ac, roles: { admin, support } })
+];
+```
+
+The check mirrors the admin plugin's `hasPermission`: every role the user holds (comma-separated in `user.role`) is asked to authorize `invite: [<action>]`, and `adminUserIds` still bypasses.
+
+Your AC file may already name this resource differently. Point the check at it with `permissionResource`; the action verbs stay the same:
+
+```ts title="auth.ts"
+// statement: { enrollment: ["create", "resend", "list", "cancel", "delete", "manage-orgs"] }
+betterEnrollment({ ac, roles, permissionResource: "enrollment" });
+```
+
+### The invite actions
+
+| Action        | Gates                                                                 |
+| ------------- | --------------------------------------------------------------------- |
+| `create`      | `invite.create`, and resend/list scoping for org members              |
+| `resend`      | `invite.resend`                                                       |
+| `list`        | `invite.list`, `invite.org.usage`                                     |
+| `cancel`      | `invite.revoke`                                                       |
+| `delete`      | `invite.delete`                                                       |
+| `manage-orgs` | `invite.org.setSeatLimit`, `invite.org.disable` / `enable` / `delete` |
+
+`inviteAdminAc` grants all six; `inviteUserAc` grants none.
+
+### Only ac, no roles
+
+With `ac` set and `roles` omitted, the exported `defaultInviteRoles` apply, mirroring the admin plugin's defaults: `admin` holds every invite action, `user` holds none.
+
+### Standalone options
+
+No admin plugin or no access-control setup needed:
+
+```ts title="auth.ts"
+betterEnrollment({
+  adminRoles: ["admin"], // roles that manage invites (default)
+  adminUserIds: ["user_123"], // ids that always may
+  canManageInvites: async (user) => user.email.endsWith("@corp.com") // custom gate
+});
+```
+
+- `adminRoles` matches against the user's roles; every gated endpoint is all-or-nothing, there is no per-action granularity on this path.
+- `canManageInvites`, when set, replaces `adminRoles` and `adminUserIds` entirely.
+- With nothing configured, the default is `adminRoles: ["admin"]`, the same outcome as `defaultInviteRoles`.
+
+## Organization invites
+
+`org-join` invites are the org's own business and never gated by app adminship. Pass the same `ac` and `roles` you gave the organization plugin:
+
+```ts title="auth.ts"
+import { organization } from "better-auth/plugins";
+// orgAc, orgRoles: the file built for the organization plugin
+
+plugins: [
+  organization({ ac: orgAc, roles: orgRoles }),
+  betterEnrollment({
+    organization: { ac: orgAc, roles: orgRoles }
+  })
+];
+```
+
+A member may create org-join invites when one of their org roles authorizes `invitation: ["create"]`, and revoke or delete them with `invitation: ["cancel"]`, exactly the org plugin's own statements.
+
+- **Roles omitted**: the org plugin defaults apply, owner and admin hold `invitation` create and cancel.
+- **Roles provided**: the record fully replaces those defaults, mirroring the org plugin. A role missing from the record, including `owner`, has no invite permission.
+- **Dynamic access control**: custom roles stored in the `organizationRole` table are resolved per org and honored.
+- **Override**: `organization.canCreateOrgInvites(member, org)` replaces the `invitation:create` check for creation.
+
+## Where to go next
+
+<Cards>
+  <Card
+    icon={<Settings2 />}
+    title="Options"
+    description="Every option betterEnrollment accepts, with defaults."
+    href="/docs/options"
+  />
+  <Card
+    icon={<Building2 />}
+    title="Organizations"
+    description="Org invites, seat limits, and who can do what."
+    href="/docs/organizations"
+  />
+</Cards>

@@ -57,7 +57,7 @@ await authClient.invite.org.enable({ organizationId });
 await authClient.invite.org.delete({ organizationId });
 ```
 
-## Who can do what
+## Who can do what [!updated]
 
 | Action                             | App admin           | Org owner or admin | Member with `invitation:create` | Plain member |
 | ---------------------------------- | ------------------- | ------------------ | ------------------------------- | ------------ |
@@ -67,7 +67,7 @@ await authClient.invite.org.delete({ organizationId });
 | Revoke or delete                   | Moderation backstop | Own org            | Own org (`invitation:cancel`)   | No           |
 | Seat limits, disable, delete org   | Yes                 | No                 | No                              | No           |
 
-App admins come from `adminRoles` (default `["admin"]`), `adminUserIds`, or your own `canManageInvites(user)` callback. Org permissions are the org plugin's own access control. Cross-org calls return `FORBIDDEN`, and unknown org ids look identical so they cannot be enumerated.
+App admins come from the admin plugin's AC file (`ac` and `roles` passed to the plugin) or, without one, from `adminRoles` (default `["admin"]`), `adminUserIds`, or your own `canManageInvites(user)` callback; see [Permissions](/docs/permissions). Org permissions are the org plugin's own access control. Cross-org calls return `FORBIDDEN`, and unknown org ids look identical so they cannot be enumerated.
 
 One actor sits outside this table: trusted server code. The server-only [`createSystemInvite`](/docs/api#server-only) endpoint can create any invite kind, including `org-join`, without a session or org membership; seat limits, disabled-org checks, and the `allowOwnerInvites` switch still apply. System invites store `createdByUserId` as null and a self-declared inviter, so they remain distinguishable from member-created invites in the audit trail, but their attribution is only as trustworthy as the code that called the endpoint.
 

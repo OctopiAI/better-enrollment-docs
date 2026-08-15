@@ -30,10 +30,11 @@ import { INVITE_ERROR_CODES } from "@octopi-ai/better-enrollment";
 | `ROLE_NOT_ALLOWED_FOR_ORG_JOIN` | `org-join` invites cannot set an app role   |
 | `NOT_ALLOWED_TO_MANAGE_INVITES` | Failed the admin gate                       |
 
-## Redemption guards
+## Redemption guards [!updated]
 
 | Code                        | When                                                                      |
 | --------------------------- | ------------------------------------------------------------------------- |
+| `PASSWORD_NOT_AVAILABLE`    | A password was sent to a [passwordless app](/docs/magic-link)             |
 | `EMAIL_MISMATCH`            | Open-mode activation guard: the emails do not match                       |
 | `EMAIL_NOT_VERIFIED`        | Open-mode activation guard: the email is not verified                     |
 | `USER_BANNED`               | Banned accounts cannot redeem                                             |

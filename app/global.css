@@ -161,6 +161,17 @@
   padding: 1px 4px;
 }
 
+/* Content links: brand purple, no underline. Heading self-links and Card
+   components carry data-card and keep their own styling. Unlayered on
+   purpose so it wins over the layered prose defaults. */
+.prose a:not([data-card]) {
+  color: var(--primary);
+  text-decoration: none;
+}
+.prose a:not([data-card]):hover {
+  color: color-mix(in srgb, var(--primary) 80%, var(--foreground));
+}
+
 html {
   scrollbar-gutter: stable;
 }

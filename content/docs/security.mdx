@@ -2,21 +2,24 @@
 title: Security
 description: What is blocked, why, and how tokens are stored.
 icon: ShieldCheck
+status: updated
 ---
 
-## What is blocked in invite-only mode
+## What is blocked in invite-only mode [!updated]
 
 While a private invite is pending:
 
-| Attempt                               | Blocked by                                                       | Response                                |
-| ------------------------------------- | ---------------------------------------------------------------- | --------------------------------------- |
-| `POST /sign-up/email`                 | Better Auth `disableSignUp`                                      | `EMAIL_PASSWORD_SIGN_UP_DISABLED`       |
-| `POST /sign-in/email`                 | No credential account exists yet                                 | `INVALID_EMAIL_OR_PASSWORD`             |
-| `POST /request-password-reset`        | Plugin before-hook                                               | Silent success, nothing sent, no oracle |
-| OAuth sign-up as a new user           | Provider `disableSignUp`                                         | Redirect with `?error=signup_disabled`  |
-| OAuth linking to the pre-created user | `requireLocalEmailVerified` plus an `account.create.before` hook | Account not linked                      |
+| Attempt                                    | Blocked by                                                                         | Response                                |
+| ------------------------------------------ | ---------------------------------------------------------------------------------- | --------------------------------------- |
+| `POST /sign-up/email`                      | Better Auth `disableSignUp`                                                        | `EMAIL_PASSWORD_SIGN_UP_DISABLED`       |
+| `POST /sign-in/email`                      | No credential account exists yet                                                   | `INVALID_EMAIL_OR_PASSWORD`             |
+| `POST /request-password-reset`             | Plugin before-hook                                                                 | Silent success, nothing sent, no oracle |
+| OAuth sign-up as a new user                | Provider `disableSignUp`                                                           | Redirect with `?error=signup_disabled`  |
+| OAuth linking to the pre-created user      | `requireLocalEmailVerified` plus an `account.create.before` hook                   | Account not linked                      |
+| `POST /sign-in/magic-link`                 | Plugin before-hook                                                                 | Silent success, nothing sent, no oracle |
+| Magic-link sign-in to the pre-created user | Plugin before-hook on `/magic-link/verify` plus a `session.create.before` backstop | `INVITATION_REQUIRED`                   |
 
-After acceptance the user is verified, so OAuth linking works normally.
+After acceptance the user is verified, so OAuth linking and [magic-link sign-in](/docs/magic-link) work normally.
 
 ## Why the password-reset hook exists
 
