@@ -38,7 +38,7 @@ Two of the four are basic and never collect fields: `SIGN_IN` hands off to your 
 }
 ```
 
-### What your page will see
+### What your page will see [!updated]
 
 <Tabs groupId="enrollment-mode" persist defaultValue="invite-only">
 
@@ -55,7 +55,7 @@ Two of the four are basic and never collect fields: `SIGN_IN` hands off to your 
 
 <Tab value="invite-only">
 
-Invitees have no account, so live invites always return `nextAction: "SIGN_UP"`: your page is a sign-up form driven by `requiredFields`. You only ever handle two states, `SIGN_UP` and `null`.
+Invitees have no account, so live invites always return `nextAction: "SIGN_UP"`: your page is a sign-up form driven by `requiredFields`. You only ever handle two states, `SIGN_UP` and `null`. On a [passwordless app](/docs/magic-link) the response carries `passwordless: true` and `requiredFields` omits `password`, so a field-driven form needs no special casing.
 
 </Tab>
 

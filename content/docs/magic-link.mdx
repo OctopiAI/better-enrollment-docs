@@ -1,0 +1,131 @@
+---
+title: Magic links
+description: Passwordless invites for magic-link apps, from setup to the invite page.
+icon: WandSparkles
+status: new
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
+import { Link2, Users, PanelTop, ShieldCheck } from "lucide-react";
+
+Apps that sign in with Better Auth's [magic-link plugin](https://better-auth.com/docs/plugins/magic-link) have no passwords. Better Enrollment detects that and switches redemption to passwordless: invitees accept without a password, and the plugin blocks the ways a magic link could sneak past a pending invite.
+
+## Setup
+
+<Steps>
+
+<Step>
+
+### Register both plugins
+
+Keep magic-link sign-up closed in an invite-only app; the invite is the only door.
+
+```ts title="auth.ts"
+import { magicLink } from "better-auth/plugins";
+import { betterEnrollment } from "@octopi-ai/better-enrollment";
+
+export const auth = betterAuth({
+  plugins: [
+    magicLink({
+      disableSignUp: true,
+      sendMagicLink: async ({ email, url }) => {
+        await sendEmail(email, `Sign in: ${url}`);
+      }
+    }),
+    betterEnrollment({
+      sendPrivateInvitation: async ({ email, url }) => {
+        await sendEmail(email, `You are invited: ${url}`);
+      }
+    })
+  ]
+});
+```
+
+</Step>
+
+<Step>
+
+### That is all
+
+Passwordless mode is on automatically when the magic-link plugin is registered and `emailAndPassword` is not enabled. No option needed; force it either way with `passwordless: true | false`.
+
+</Step>
+
+</Steps>
+
+## What changes
+
+|                        | With passwords                      | Passwordless                                                             |
+| ---------------------- | ----------------------------------- | ------------------------------------------------------------------------ |
+| Accept body            | `password` required                 | no `password` (sending one fails with `PASSWORD_NOT_AVAILABLE`)          |
+| Account row            | credential account created          | none; sign-in is always by magic link                                    |
+| After a private accept | user signs in with the new password | signed in immediately (`signedIn: true`, session cookie set)             |
+| After a public accept  | user signs in with the new password | user signs in with their first magic link, which also verifies the email |
+
+A private invite can sign the accepter in directly because the emailed token already proved they own the mailbox. A shareable public link proves nothing, so verification waits for the first magic link.
+
+## Build the invite page
+
+The same [invite page](/docs/invite-page) pattern works unchanged; `invite.get` tells you everything:
+
+```ts title="app/invite/page.tsx"
+const info = await authClient.invite.get({ query: { token } });
+// info.passwordless === true, info.requiredFields has no "password"
+
+// 1. Render a form from info.requiredFields (name, email for public invites).
+const res = await authClient.invite.accept({ token, name });
+
+// 2. Route by what accept did:
+if (res.data?.signedIn) {
+  router.push("/dashboard"); // private invite: already signed in
+} else {
+  // public invite: one magic link signs them in and verifies the email
+  await authClient.signIn.magicLink({
+    email,
+    callbackURL: "/dashboard"
+  });
+}
+```
+
+If you drive the form purely from `requiredFields`, passwordless needs no special casing; the password input simply never renders.
+
+## Mixed apps
+
+With both `emailAndPassword` and magic link enabled, auto detection keeps the password flow: accept requires a password and creates a credential account, exactly as before. Set `passwordless: true` to accept without one anyway; accepters then sign in via magic link.
+
+## Built-in protection
+
+Magic-link verify signs in any existing user, and a private invite pre-creates one, so without a guard the invitee could sign in and skip your invite flow (no name, no [additional fields](/docs/options#additional-fields), no audit row). The plugin ships three guards, active only in invite-only mode:
+
+- A hook on `/sign-in/magic-link` silently skips sending for addresses held by a pre-created shell, returning the endpoint's normal success body: no dead link in the inbox, no invite oracle.
+- A hook on `/magic-link/verify` covers links already in flight: it rejects sign-ins for pre-created shells with `INVITATION_REQUIRED`, resolving the link's email without consuming the token and honoring the magic-link plugin's `storeToken` setting.
+- A `session.create.before` backstop covers verify paths the hook cannot resolve. Its path list is `passwordlessVerifyPaths` (default `["/magic-link/verify"]`); extend it if you add other passwordless plugins.
+
+Existing accounts are never blocked (activation invites sign in normally), ordinary sign-ins cost zero extra queries, and [mode detection](/docs/modes) counts the magic-link sign-up path, so `mode: "auto"` and the invite-only interlock both see it.
+
+## Options
+
+```ts title="auth.ts"
+betterEnrollment({
+  passwordless: "auto", // true | false | "auto" (default)
+  passwordlessVerifyPaths: ["/magic-link/verify"] // paths the session backstop guards
+});
+```
+
+## Where to go next
+
+<Cards>
+  <Card
+    icon={<PanelTop />}
+    title="The invite page"
+    description="One page for every invite kind, driven by nextAction and requiredFields."
+    href="/docs/invite-page"
+  />
+  <Card
+    icon={<ShieldCheck />}
+    title="Security"
+    description="What is blocked, why, and how tokens are stored."
+    href="/docs/security"
+  />
+</Cards>

@@ -83,6 +83,17 @@ betterEnrollment({
 
 `autoVerifyPublicInviteEmail` and its trade-offs are covered in [Verifying public-invite emails](/docs/invites#verifying-public-invite-emails). By default `invite.get` returns a masked email such as `a***@example.com`; see [The invite page](/docs/invite-page).
 
+## Passwordless [!new]
+
+For apps signing in with the [magic-link plugin](/docs/magic-link). Auto-detected; the options exist to force or extend it:
+
+```ts title="auth.ts"
+betterEnrollment({
+  passwordless: "auto", // true | false | "auto" (magic link present, no emailAndPassword)
+  passwordlessVerifyPaths: ["/magic-link/verify"] // paths the sign-in backstop guards
+});
+```
+
 ## Additional fields [!new]
 
 Extra profile fields collected at redemption, declared like Better Auth's `user.additionalFields`:
@@ -105,13 +116,27 @@ betterEnrollment({
 - **No clobbering**: on `CONFIRM` the update targets an existing account, so `defaultValue` is never applied there.
 - **Rendering**: `invite.get` lists the step's fields in `requiredFields` / `optionalFields`, with a `{ type, required }` map in `additionalFields`; see [The invite page](/docs/invite-page).
 
-## Who may manage invitations
+## Permissions [!new]
+
+Two systems; the full picture, including per-action granularity and precedence, is on [Permissions](/docs/permissions).
+
+Using the admin plugin's access-control file (highest priority, recommended):
+
+```ts title="auth.ts"
+betterEnrollment({
+  ac, // the same access controller given to the admin plugin
+  roles, // the same roles record; roles need invite:<action> grants
+  permissionResource: "invite" // point at your own resource name if it differs
+});
+```
+
+Standalone, without an AC file:
 
 ```ts title="auth.ts"
 betterEnrollment({
   adminRoles: ["admin"],
-  adminUserIds: [],
-  canManageInvites: undefined // (user) => boolean, replaces the two above
+  adminUserIds: [], // always allowed, in both systems
+  canManageInvites: undefined // (user) => boolean, replaces adminRoles/adminUserIds
 });
 ```
 

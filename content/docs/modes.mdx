@@ -2,6 +2,7 @@
 title: The two modes
 description: Invite-only and open, and how auto-detection picks one.
 icon: Split
+status: updated
 ---
 
 import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
@@ -10,11 +11,12 @@ import { Lock, Rocket, Ticket, UserPlus } from "lucide-react";
 Better Enrollment's `mode` accepts `"auto"` (default), `"invite-only"`, or `"open"`. In `auto` the plugin inspects your config at startup: everything closed means invite-only, everything open means open, and a mixed config throws with a message naming each path, asking you to set `mode` explicitly.
 
 <Callout type="warn" title="Your responsibility, for now">
-  Detection only sees `emailAndPassword` and `socialProviders`. Sign-up paths added by other plugins
-  (magic link, email OTP, passkey, phone number, anonymous, generic OAuth) are invisible to it and
-  are NOT blocked at runtime, so any of them silently bypasses invite-only mode. If you use one, you
-  must close or remove its sign-up path yourself. A runtime backstop that rejects non-invite user
-  creation is on the [roadmap](/docs/roadmap).
+  Detection sees `emailAndPassword`, `socialProviders`, and the [magic-link
+  plugin](/docs/magic-link). Sign-up paths added by other plugins (email OTP, passkey, phone number,
+  anonymous, generic OAuth) are invisible to it and are NOT blocked at runtime, so any of them
+  silently bypasses invite-only mode. If you use one, you must close or remove its sign-up path
+  yourself. A runtime backstop that rejects non-invite user creation is on the
+  [roadmap](/docs/roadmap).
 </Callout>
 
 ## The two configurations
