@@ -6,6 +6,15 @@ icon: BookOpen
 
 import { InstallCommand } from "@/components/install-command";
 import {
+  AtAGlance,
+  Feature,
+  FeatureGrid,
+  FlowStep,
+  FlowSteps,
+  ModeCard,
+  ModeGrid
+} from "@/components/intro";
+import {
   Building2,
   Download,
   Link2,
@@ -22,64 +31,117 @@ import {
   Workflow
 } from "lucide-react";
 
-Better Enrollment is a plugin for [Better Auth](https://www.better-auth.com) that makes invitations the front door of your app. Run fully invite-only, hand out shareable invite links, or use invites as role and organization grants in an open app.
+Better Enrollment is a plugin for [Better Auth](https://www.better-auth.com) that makes **invitations the front door of your app**. Run fully invite-only, hand out shareable invite links, or use invites as role and organization grants in an open app.
 
 <InstallCommand className="mt-2" />
 
-## Features
+<AtAGlance />
 
-<Cards>
-  <Card
-    icon={<Lock />}
+## Pick your front door
+
+The plugin runs in one of two modes, auto-detected from your Better Auth config, and every invite works the same way in both.
+
+<ModeGrid>
+  <ModeCard
+    href="/docs/modes"
+    tag='mode: "invite-only"'
+    title="Invite-only"
+    description="Every sign-up route is closed. The only way into your app is an invitation."
+    points={[
+      "Email, OAuth, and password-reset sign-ups are blocked",
+      "Magic-link sign-ups are detected and guarded",
+      "Redeeming an invite is what creates the account"
+    ]}
+  />
+  <ModeCard
+    href="/docs/modes"
+    tag='mode: "open"'
+    title="Open"
+    description="Self-serve sign-ups stay on, and invitations become grants."
+    points={[
+      "Invites merge roles into new or existing accounts",
+      "Organization invites seat members or found new orgs",
+      "Same invite page, same API, no separate flow"
+    ]}
+  />
+</ModeGrid>
+
+## The life of an invite
+
+A single `?token=` page and one `redeem` call handle every invite kind in both modes. The full lifecycle is on [How it works](/docs/how-it-works).
+
+<FlowSteps>
+  <FlowStep
+    step="01"
+    title="Create"
+    description="An admin, an org member, or your server issues a private invite or a public link, with roles and org bindings attached."
+  />
+  <FlowStep
+    step="02"
+    title="Deliver"
+    description="You send the link through your own email delivery or share it directly. Tokens are hashed at rest and expire on schedule."
+  />
+  <FlowStep
+    step="03"
+    title="Redeem"
+    description="The invitee lands on your invite page. One call verifies the token, creates or activates the account, and writes the audit trail."
+  />
+</FlowSteps>
+
+## Everything included
+
+<FeatureGrid>
+  <Feature
+    icon={Lock}
     title="Invite-only mode"
     description="Close every sign-up route and let people in only through invitations."
   />
-  <Card
-    icon={<UserPlus />}
+  <Feature
+    icon={UserPlus}
     title="Open mode"
     description="Invitations become role and organization grants for self-serve sign-ups."
   />
-  <Card
-    icon={<Mail />}
+  <Feature
+    icon={Mail}
     title="Private invites"
     description="Email-bound, single use, verified on accept."
   />
-  <Card
-    icon={<Link2 />}
+  <Feature
+    icon={Link2}
     title="Public invites"
     description="Shareable links with use caps, expiry, and revocation."
   />
-  <Card
-    icon={<Building2 />}
+  <Feature
+    icon={Building2}
     title="Organization onboarding"
     description="One link joins an org, or lets the invitee found their own."
   />
-  <Card
-    icon={<Users />}
+  <Feature
+    icon={Users}
     title="Seat limits"
     description="Per-org caps with pending-invite reservations and subscription hooks."
   />
-  <Card
-    icon={<ShieldCheck />}
+  <Feature
+    icon={ShieldCheck}
     title="Security first"
     description="Hashed tokens, atomic race-safe redemption, no email oracles."
   />
-  <Card
-    icon={<ScrollText />}
+  <Feature
+    icon={ScrollText}
     title="Audit trail"
     description="Append-only record of who invited whom and who redeemed what."
   />
-  <Card
-    icon={<PanelTop />}
+  <Feature
+    icon={PanelTop}
     title="One redemption page"
     description="A single token page and one redeem call handle every invite kind in both modes."
   />
-  <Card
-    icon={<Plug />}
+  <Feature
+    icon={Plug}
     title="Adapter-agnostic"
     description="Works with any Better Auth database adapter, no extra infrastructure."
   />
-</Cards>
+</FeatureGrid>
 
 ## Get started
 

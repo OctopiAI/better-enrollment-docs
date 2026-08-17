@@ -51,6 +51,43 @@ export const softwareGraph = {
   ]
 };
 
+export function buildChangelogSchema(releases: { version: string; title: string; date: string }[]) {
+  const pageUrl = `${siteUrl}/changelog`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: appName, item: `${siteUrl}/` },
+          { "@type": "ListItem", position: 2, name: "Changelog", item: pageUrl }
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: `${appName} Changelog`,
+        description: `New features, fixes, and breaking changes in every ${appName} release.`,
+        isPartOf: { "@id": websiteId },
+        about: { "@id": softwareId },
+        inLanguage: "en",
+        ...(releases[0] ? { dateModified: releases[0].date } : {})
+      },
+      {
+        "@type": "ItemList",
+        itemListElement: releases.map((release, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: `v${release.version}: ${release.title}`,
+          url: `${pageUrl}#v${release.version}`
+        }))
+      }
+    ]
+  };
+}
+
 type Page = ReturnType<(typeof source)["getPages"]>[number];
 type TreeNode = { type: string; name?: unknown; url?: string; children?: TreeNode[] };
 

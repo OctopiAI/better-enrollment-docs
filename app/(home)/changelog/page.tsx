@@ -3,7 +3,9 @@ import type { ComponentProps } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ExpandableRelease } from "@/components/expandable-release";
 import { getMDXComponents } from "@/components/mdx";
+import { JsonLd } from "@/components/json-ld";
 import { changelogEntries } from "@/lib/changelog";
+import { buildChangelogSchema } from "@/lib/schema";
 import { appName, gitConfig } from "@/lib/shared";
 
 const pageTitle = "Changelog";
@@ -72,6 +74,7 @@ export default async function ChangelogPage() {
 
   return (
     <main className="flex flex-1 flex-col">
+      <JsonLd data={buildChangelogSchema(visibleEntries)} />
       <section className="mx-auto w-full max-w-4xl px-4 pt-16 pb-12 md:pt-24">
         <span className="text-primary font-mono text-[11px] tracking-widest uppercase">
           Changelog
