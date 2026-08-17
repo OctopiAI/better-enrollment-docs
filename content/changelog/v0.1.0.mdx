@@ -1,0 +1,22 @@
+---
+title: First public release
+description: Invitations as the front door of your app. Invite-only mode, private and public invites, organization onboarding, and a full audit trail.
+version: 0.1.0
+date: "2026-08-04"
+---
+
+Better Enrollment is a plugin for [Better Auth](https://www.better-auth.com) that makes invitations the front door of your app: run fully invite-only, hand out shareable invite links, or use invites as role and organization grants in an open app.
+
+### Highlights
+
+- **Invite-only mode**: closes every sign-up route (email, OAuth, password reset) so people get in only through invitations.
+- **Open mode**: invitations become role and organization grants for self-serve sign-ups.
+- **Private invites**: email-bound, single use, verified on accept.
+- **Public invites**: shareable links with use caps, expiry, and revocation.
+- **Organization onboarding**: one link joins an org, or lets the invitee found their own, with per-org seat limits, pending-invite reservations, and subscription hooks.
+- **One redemption page**: a single `?token=` page and one `redeem` call handle every invite kind in both modes.
+- **Security first**: SHA-256 hashed tokens (~190 bits of entropy), atomic race-safe redemption, and no email or account oracles on any endpoint.
+- **Audit trail**: append-only record of who invited whom and who redeemed what.
+- **Adapter-agnostic**: works with any Better Auth database adapter, no extra infrastructure.
+
+Published to npm as [`@octopi-ai/better-enrollment`](https://www.npmjs.com/package/@octopi-ai/better-enrollment) with provenance via trusted publishing. Start with the [Quick Start](/docs/quick-start).

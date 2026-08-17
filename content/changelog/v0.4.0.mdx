@@ -1,0 +1,39 @@
+---
+title: Access-control files and passwordless magic links
+description: One access-control file now drives invite permissions everywhere, and magic-link apps get passwordless redemption with built-in invite-only guards.
+version: 0.4.0
+date: "2026-08-15"
+---
+
+### Breaking changes
+
+- **org**: A provided `organization.roles` record now fully replaces the built-in owner/admin defaults, mirroring the org plugin's own `hasPermission`. A role missing from your record, including `owner`, no longer holds `invitation` permissions implicitly. Apps that pass no `roles` record are unaffected: owner and admin keep their defaults.
+- **modes**: The magic-link plugin's sign-up path is now visible to mode detection. `mode: "auto"` with an open magic link alongside a closed email path now throws the mixed-config error at init, and explicit `invite-only` with an open magic link throws unless `allowOpenSignup: true`. Previously this path silently bypassed detection; set `disableSignUp: true` on `magicLink()` or set `mode` explicitly.
+
+### Enhancements
+
+- **permissions**: Pass the same access-control file you built for the admin plugin and one file drives permissions everywhere. New top-level `ac` and `roles` options mirror `admin({ ac, roles })`, checked per action (`create`, `resend`, `list`, `cancel`, `delete`, `manage-orgs`) with the `adminUserIds` bypass intact. New exports: `inviteStatements` (spread into your statement object), `inviteAdminAc`, `inviteUserAc`, and `defaultInviteRoles` (the fallback when only `ac` is given). The legacy `adminRoles` / `adminUserIds` / `canManageInvites` gate is unchanged and still applies when no AC is passed; when both are configured, the AC wins. See [Permissions](/docs/permissions).
+
+  ```ts
+  export const statement = { ...defaultStatements, ...inviteStatements } as const;
+  export const ac = createAccessControl(statement);
+  export const admin = ac.newRole({ ...adminAc.statements, ...inviteAdminAc.statements });
+
+  plugins: [adminPlugin({ ac, roles: { admin } }), betterEnrollment({ ac, roles: { admin } })];
+  ```
+
+- **permissions**: New `permissionResource` option (default `"invite"`) points the check at a resource your AC file already names, for example `enrollment: ["create"]`, without renaming anything. Action verbs stay canonical.
+- **magic-link**: Passwordless redemption for magic-link apps. Auto-detected (`passwordless: "auto"`, on when the magic-link plugin is registered and `emailAndPassword` is off): accept works without a password and never creates a credential account. Private accepters are signed in directly (`signedIn: true` in the response, session cookie set) since the emailed token already proved the mailbox; public accepters stay signed out and unverified until their first magic link. A password sent to a passwordless app fails with the new `PASSWORD_NOT_AVAILABLE` (400) instead of being silently dropped. See [Magic links](/docs/magic-link).
+- **magic-link**: Three built-in guards keep invite-only closed: `/sign-in/magic-link` silently skips sending for pre-created invite shells (same no-oracle pattern as the password-reset guard), `/magic-link/verify` rejects in-flight links for shells with `INVITATION_REQUIRED`, and a `session.create.before` backstop guards the paths in the new `passwordlessVerifyPaths` option (default `["/magic-link/verify"]`). Existing accounts always sign in normally; ordinary sign-ins cost zero extra queries.
+- **api**: `GET /invite/get` now returns `passwordless` and omits `"password"` from `requiredFields` on passwordless apps, so pages rendering from `requiredFields` adapt by themselves. Accept and redeem responses gain a `signedIn` boolean, and `/invite/accept` no longer requires `password` at the schema level (the flow still enforces it unless passwordless).
+
+### Fixes
+
+- **accept**: An activation invite held by an established passwordless account (verified, zero account rows) now returns `SIGN_IN_REQUIRED` instead of letting a direct `/invite/accept` call overwrite the profile and mint a session from token possession.
+- **redeem**: A failed passwordless accept now removes the session it minted before rolling the invite back to pending, so a pending invite can never leave a live session behind.
+
+### Migration notes
+
+1. If you pass a partial `organization.roles` record, re-add every role that should manage org invites (including `owner`) with `invitation: ["create", "cancel"]` grants.
+2. Run `npx @better-auth/cli migrate` (or `generate`): `invite.preCreatedUserId` gained an index for the new sign-in guards.
+3. Magic-link apps: nothing to configure; verify your invite page renders from `requiredFields` and branches on `signedIn` after accept.

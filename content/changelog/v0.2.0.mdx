@@ -1,0 +1,22 @@
+---
+title: System invites and universal resend
+description: Headless invite creation for cron jobs and webhooks, resend for every invite kind, and a safer redemption flow that no longer signs users in.
+version: 0.2.0
+date: "2026-08-07"
+---
+
+### Breaking changes
+
+- **redeem**: Redemption no longer creates a session, for security reasons. `invite.redeem` and `invite.accept` create the user and credential account, then return without signing the user in; sign them in through your application's designated auth flow, for example `authClient.signIn.email({ email, password })`. With `requireEmailVerification: true`, an unverified public-invite accepter can no longer enter until they verify.
+- **redeem**: The `token` field was removed from the accept and redeem response. The success shape is now `{ action: "ACCEPTED", user, organization? }`, matching the activation flow.
+- **redeem**: Redemption no longer sets the session's active organization in either flow. Selecting the active org after an `org-join` or `org-create` invite is your app's decision via the org plugin's `setActive`.
+- **hooks**: `onInviteCreated` now receives `admin: User | null`; it is `null` for invites created through the server-only endpoint.
+
+### Enhancements
+
+- **api**: New `resendInvite` endpoint (`authClient.invite.resend({ inviteId })`), universal across every invite kind and delivery type. Rotates the token and expiry on the same invite row, so the previous link is invalidated on success while the invitee, roles, org bindings, remaining uses, and audit history are preserved. Revives expired pending invites (re-checking seat limits for `org-join`). Adds the `onInviteResent` hook.
+- **api**: New server-only `createSystemInvite` endpoint for headless invite creation from cron jobs, webhooks, and system integrations. No session required; every invariant still runs, only the permission gates are skipped. Attribution resolves explicit `inviter`, then `appName`, then `"System"`, with `createdByUserId` stored as `null`. Never mounted as an HTTP route.
+
+### Fixes
+
+- **verification**: Public-invite redemptions now send Better Auth's verification email when `emailVerification.sendOnSignUp` (or `requireEmailVerification`) is configured. Previously it was never sent because redemption bypasses the sign-up route where `sendOnSignUp` runs.
