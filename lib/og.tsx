@@ -109,7 +109,17 @@ function Mark({ size, color = "#FFFFFF" }: { size: number; color?: string }) {
 }
 
 /** OG image for docs pages: brand header, big title, description. */
-export function DocsOG({ title, description }: { title: string; description?: string }) {
+export function DocsOG({
+  title,
+  description,
+  section = "Docs",
+  kicker = "AN INVITE PLUGIN FOR BETTER AUTH"
+}: {
+  title: string;
+  description?: string;
+  section?: string;
+  kicker?: string;
+}) {
   return (
     <Frame>
       <div
@@ -126,7 +136,7 @@ export function DocsOG({ title, description }: { title: string; description?: st
             {appName}
           </div>
           <div style={{ display: "flex", fontSize: 30, color: "#52525B" }}>/</div>
-          <div style={{ display: "flex", fontSize: 30, color: gray }}>Docs</div>
+          <div style={{ display: "flex", fontSize: 30, color: gray }}>{section}</div>
         </div>
 
         <div
@@ -169,7 +179,7 @@ export function DocsOG({ title, description }: { title: string; description?: st
               color: purpleMid
             }}
           >
-            AN INVITE PLUGIN FOR BETTER AUTH
+            {kicker}
           </div>
         </div>
 
