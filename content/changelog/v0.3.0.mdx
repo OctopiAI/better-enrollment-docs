@@ -1,0 +1,34 @@
+---
+title: Additional fields at redemption
+description: Collect custom profile fields on the invite page, declared per step, and name is now required on sign-up redemptions.
+version: 0.3.0
+date: "2026-08-13"
+---
+
+### Breaking changes
+
+- **redeem**: `name` is now required to redeem a sign-up invitation. `invite.redeem` and `invite.accept` reject sign-up redemptions that omit it with the new `NAME_REQUIRED` (400) error; the accept flow exists to populate the invitee's profile, and a nameless profile defeats it. Creating an invite still does not require a name, and activation flows (open mode, or invites held by existing accounts) are unaffected.
+- **api**: `requiredFields` from `GET /invite/get` now includes `"name"` for every `SIGN_UP` response. Pages that render inputs directly from `requiredFields` pick this up automatically; tests asserting the exact array need updating.
+
+### Enhancements
+
+- **options**: New `additionalFields` option collects extra profile fields at redemption, mirroring Better Auth's `user.additionalFields`: `type` (`string`, `number`, `boolean`, `date`), `required` (default `true`), `defaultValue`, an optional standard-schema `validator` (a plain zod schema works), and `actions`. Fields become nullable columns on the user model (run `migrate` or `generate`; do not duplicate them under `user.additionalFields`), are validated before the invite use is consumed (`ADDITIONAL_FIELD_REQUIRED` / `ADDITIONAL_FIELD_INVALID`, so a rejected submission never burns a use), and are stored on the created or activated user. See [Options](/docs/options#additional-fields).
+
+  ```ts
+  betterEnrollment({
+    additionalFields: {
+      department: { type: "string" },
+      referral: { type: "string", required: false },
+      seniority: { type: "number", validator: { input: z.number().min(0) } },
+      team: { type: "string", actions: ["SIGN_UP", "CONFIRM"] }
+    }
+  });
+  ```
+
+- **redeem**: Per-step collection via `actions`. Of the four next actions, `SIGN_IN` and the terminal state render no fields; `SIGN_UP` and `CONFIRM` are forms and can carry additional fields. The `actions` list (default `["SIGN_UP"]`) is exact, never additive: `["CONFIRM"]` means confirm only; name both to cover both forms. On `CONFIRM` the values are written to the existing user in the same update as the role merge, and `defaultValue` is never applied there, so an absent field can never overwrite data the user already has.
+- **api**: `GET /invite/get` now describes the current step's form: a new `optionalFields` array and a `fields` map (`{ [name]: { type, required } }`) alongside `requiredFields`, computed per step: the sign-up built-ins plus that step's extra fields for `SIGN_UP`, the confirm-step fields for `CONFIRM`, and all three empty for `SIGN_IN` and terminal states.
+
+### Migration notes
+
+1. Add a name input to your invite page for `SIGN_UP` states (rendering from `requiredFields` does it by itself) and pass `name` in `invite.redeem` / `invite.accept` calls.
+2. If you adopt `additionalFields`, run `npx @better-auth/cli migrate` (or `generate`) to create the columns. Pages that render from `requiredFields` / `optionalFields` pick the fields up automatically, `CONFIRM` included.
