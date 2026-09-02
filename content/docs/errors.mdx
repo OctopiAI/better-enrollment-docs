@@ -2,6 +2,7 @@
 title: Error codes
 description: Every APIError code the plugin can return.
 icon: TriangleAlert
+status: updated
 ---
 
 Errors are Better Auth `APIError`s carrying a `code` and a `message`:
@@ -10,16 +11,16 @@ Errors are Better Auth `APIError`s carrying a `code` and a `message`:
 import { INVITE_ERROR_CODES } from "@octopi-ai/better-enrollment";
 ```
 
-## Invite state
+## Invite state [!updated]
 
-| Code                    | When                                                                         |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| `INVITE_NOT_FOUND`      | Unknown or no longer valid token                                             |
-| `INVITE_EXPIRED`        | The invite passed its `expiresAt`                                            |
-| `INVITE_REVOKED`        | The invite was revoked                                                       |
-| `INVITE_ALREADY_USED`   | A single-use invite was already redeemed, or a public invite hit its use cap |
-| `EMAIL_ALREADY_INVITED` | A pending invite already holds that address                                  |
-| `USER_ALREADY_EXISTS`   | That address already has an account                                          |
+| Code                    | When                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `INVITE_NOT_FOUND`      | Unknown or no longer valid token                                                                              |
+| `INVITE_EXPIRED`        | The invite passed its `expiresAt`                                                                             |
+| `INVITE_REVOKED`        | The invite was revoked                                                                                        |
+| `INVITE_ALREADY_USED`   | A single-use invite was already redeemed, or a public invite hit its use cap                                  |
+| `EMAIL_ALREADY_INVITED` | A pending invite of the same kind (and, for `org-join`, the same org) already holds that address; resend it |
+| `USER_ALREADY_EXISTS`   | `app` invite to an address that already has an established account                                          |
 
 ## Roles and permissions
 

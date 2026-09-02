@@ -20,7 +20,7 @@ authClient.invite.redeem({ token, ... });
 ```ts
 authClient.invite.create({ kind?, type?, email?, name?, role?, maxUses?, expiresIn?,
                            organizationId?, organizationRole?, teamId?, presetSeatLimit? });
-authClient.invite.list({ status?, type?, organizationId?, page?, limit? });
+authClient.invite.list({ status?, type?, kind?, email?, organizationId?, page?, limit? });
 authClient.invite.resend({ inviteId, expiresIn? });
 authClient.invite.revoke({ inviteId });
 authClient.invite.delete({ inviteId });
