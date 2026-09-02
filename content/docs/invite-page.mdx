@@ -55,7 +55,7 @@ Two of the four are basic and never collect fields: `SIGN_IN` hands off to your 
 
 <Tab value="invite-only">
 
-Invitees have no account, so live invites always return `nextAction: "SIGN_UP"`: your page is a sign-up form driven by `requiredFields`. You only ever handle two states, `SIGN_UP` and `null`. On a [passwordless app](/docs/magic-link) the response carries `passwordless: true` and `requiredFields` omits `password`, so a field-driven form needs no special casing.
+Most invitees have no account yet, so live invites return `nextAction: "SIGN_UP"`: your page is a sign-up form driven by `requiredFields`. An invitee who already holds an established account (an org inviting an existing user, or someone redeeming a second invite after signing up through the first) gets `"SIGN_IN"` (no session) or `"CONFIRM"` (signed in), exactly like open mode, so render all three plus `null`. The server decides from the account's live state; the page never has to work out which case it is in. On a [passwordless app](/docs/magic-link) the response carries `passwordless: true` and `requiredFields` omits `password`, so a field-driven form needs no special casing.
 
 </Tab>
 

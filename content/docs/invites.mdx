@@ -2,6 +2,7 @@
 title: Invites
 description: Invite kinds, delivery types, and how to create each one.
 icon: Ticket
+status: updated
 ---
 
 import { Building2, PanelTop } from "lucide-react";
@@ -100,9 +101,11 @@ Resending mints a new token and a fresh expiry on the same invite row, so the pr
 
 Permissions mirror creation: app admins resend `app` and `org-create` invites (and act as a moderation backstop), org members with `invitation: ["create"]` resend their org's `org-join` invites. Accepted and revoked invites cannot be resent, and reviving an expired `org-join` invite re-checks the seat limit, since its reservation had been released.
 
-## Inviting someone who already has an account
+## Inviting someone who already has an account [!updated]
 
 This works out of the box for org kinds: the invite becomes an activation invite, the invitee signs in and confirms, and redemption merges roles and membership instead of creating a user. A plain `app` invite to an existing email is rejected with `USER_ALREADY_EXISTS`, since it grants nothing an existing user lacks.
+
+The same email can hold pending private invites in several scopes at once (several orgs, or the app and an org). Whichever one the invitee redeems first is the sign-up: it claims the pre-created account, whichever invite created it, and every other invite to that email becomes an activation from then on, one click after signing in, roles merged. This also means an expired or revoked invite never gets in the way of a later one: if an `app` invite lapses and an org then invites the same person, their org link renders the normal sign-up form and joins them in one go. The only conflict left is inviting the exact same thing twice (same `kind`, same org), which returns `EMAIL_ALREADY_INVITED`; [resend](#resending-an-invitation) that invite instead.
 
 ## Verifying public-invite emails
 

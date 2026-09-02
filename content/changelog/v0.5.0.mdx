@@ -1,0 +1,30 @@
+---
+title: Coexisting invites redeem in one go
+description: Redemption now follows the account's live state, so an expired or stale invite to the same email can never strand a later one at sign-in, and the email lock is scoped to one invite per kind and organization.
+version: 0.5.0
+date: "2026-09-02"
+---
+
+### Behavior changes
+
+No API, response-shape, error-code, or database schema changes. Two documented rules change meaning:
+
+- **redeem**: For a private invite in invite-only mode, `SIGN_UP` versus `SIGN_IN` is now decided from the account's live state at redemption, not from which invite pre-created it. An inert pre-created shell (unverified, no credentials), whoever created it, renders the sign-up form and is claimed by the token being redeemed; an established account gets `SIGN_IN` / `CONFIRM` as before. So when an `app` invite expires and an org later sends an `org-join` invite to the same address, the invitee opens one link, fills one form, and joins the org, with no sign-in step over an account that has no password. Same in reverse, and across organizations. If two invites are live at once, whichever is redeemed first signs up; the other becomes a one-click activation, and roles merge in either order.
+- **redeem**: Once a token claims a shell it did not pre-create, the other invites that pointed at that shell are handed over: they become plain activation invites over the now-real account. Resending one later routes to `SIGN_IN` → `CONFIRM` and merges its role, and the magic-link guards stop treating the account as an invite shell.
+- **create**: The pending-email lock is now scoped to one invite per `kind` and organization. It still holds past `expiresAt` within a scope (resend is the release valve, as before), but invites in other scopes always coexist: an app admin can invite someone who holds an expired or live `org-join` elsewhere, and vice versa. `app` and `org-create` used to lock globally, which forced an app admin to touch an organization's invites to proceed. `USER_ALREADY_EXISTS` on `app` invites now fires only for an established account; an inert shell just skips pre-creation.
+- **redeem**: A private invite whose account has disappeared (the invite that pre-created it was deleted, swept by expiry cleanup, or its organization was deleted) now creates a fresh account on redemption instead of failing with `PRE_CREATED_USER_MISSING`. The token still proves the mailbox.
+
+### Enhancements
+
+- **list**: `GET /invite/list` accepts `email` and `kind` filters, so a UI can resolve `EMAIL_ALREADY_INVITED` to the exact row and offer a resend in place. Same visibility rules as every other filter: org members see their org only.
+
+### Fixes
+
+- **org deletion**: `/invite/org/delete` removed its `org-join` invites without cleaning up their pre-created shells, unlike every other deletion path. A deleted org's invited-but-not-yet-joined address stayed locked with nothing left to delete it through. Org deletion now clears inert shells the same way expiry cleanup does.
+
+### Migration notes
+
+No schema or config changes, and no new error codes. Two things to check in your invite UI:
+
+1. `EMAIL_ALREADY_INVITED` now means "this exact invite already exists" (same kind, same org). Offer a resend for it rather than telling the user the address is taken elsewhere; look up the `inviteId` with `invite.list` filtered by email.
+2. Your invite page should already branch on `nextAction`; nothing changes in the payload. If it hard-coded "invite-only always means `SIGN_UP`", it now needs the `SIGN_IN` and `CONFIRM` branches for invitees who already hold an account.
