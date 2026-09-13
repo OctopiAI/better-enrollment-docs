@@ -1,9 +1,10 @@
 import type { source } from "@/lib/source";
-import { appDescription, appName, gitConfig, siteUrl } from "./shared";
+import { appDescription, appName, author, gitConfig, siteUrl } from "./shared";
 
 const organizationId = `${siteUrl}/#organization`;
 const websiteId = `${siteUrl}/#website`;
 const softwareId = `${siteUrl}/#software`;
+const authorId = `${author.url}/#person`;
 
 export const siteGraph = {
   "@context": "https://schema.org",
@@ -11,9 +12,17 @@ export const siteGraph = {
     {
       "@type": "Organization",
       "@id": organizationId,
-      name: gitConfig.user,
-      url: `https://github.com/${gitConfig.user}`,
+      name: author.organization.name,
+      url: author.organization.url,
       sameAs: [`https://github.com/${gitConfig.user}`]
+    },
+    {
+      "@type": "Person",
+      "@id": authorId,
+      name: author.name,
+      url: author.url,
+      sameAs: [author.github],
+      worksFor: { "@id": organizationId }
     },
     {
       "@type": "WebSite",
@@ -22,7 +31,8 @@ export const siteGraph = {
       name: appName,
       description: appDescription,
       inLanguage: "en",
-      publisher: { "@id": organizationId }
+      publisher: { "@id": organizationId },
+      creator: { "@id": authorId }
     }
   ]
 };
@@ -41,7 +51,8 @@ export const softwareGraph = {
       runtimePlatform: "Node.js",
       license: "https://spdx.org/licenses/MIT.html",
       isPartOf: { "@id": websiteId },
-      author: { "@id": organizationId },
+      author: { "@id": authorId },
+      maintainer: { "@id": organizationId },
       targetProduct: {
         "@type": "SoftwareApplication",
         name: "Better Auth",
