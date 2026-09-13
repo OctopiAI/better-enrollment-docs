@@ -13,6 +13,13 @@ export const gitConfig = {
   branch: "main"
 };
 
+export const author = {
+  name: "Talat Mahmud",
+  url: "https://www.talatmahmud.dev",
+  github: "https://github.com/falconiZzare",
+  organization: { name: "Octopi AI", url: "https://www.octopi.ai" }
+};
+
 /**
  * Valid values for the `status` page frontmatter field, rendered as a
  * sidebar badge next to the page title (like Better Auth's "New" tags).
