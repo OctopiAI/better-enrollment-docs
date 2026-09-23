@@ -6,7 +6,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t">
       <div className="text-muted-foreground mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm sm:flex-row">
-        <p>
+        <p className="text-center">
           {appName} is built by{" "}
           <a href={author.url} className="text-foreground underline-offset-4 hover:underline">
             {author.name}
