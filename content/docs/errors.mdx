@@ -11,14 +11,18 @@ Errors are Better Auth `APIError`s carrying a `code` and a `message`:
 import { INVITE_ERROR_CODES } from "@octopi-ai/better-enrollment";
 ```
 
-## Invite state [!updated]
+## Errors from your own gates [!new]
 
-| Code                    | When                                                                                                          |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `INVITE_NOT_FOUND`      | Unknown or no longer valid token                                                                              |
-| `INVITE_EXPIRED`        | The invite passed its `expiresAt`                                                                             |
-| `INVITE_REVOKED`        | The invite was revoked                                                                                        |
-| `INVITE_ALREADY_USED`   | A single-use invite was already redeemed, or a public invite hit its use cap                                  |
+Not every error from an invite endpoint is one of the codes below. When your own code rejects a user the plugin is creating, by returning an error from `user.validateUserInfo` (Better Auth 1.7) or throwing an `APIError` from a `databaseHooks.user.create.before` hook, that error reaches the caller unchanged, with your status and `code`. It is never rewritten into `EMAIL_ALREADY_INVITED` or `PRE_CREATED_USER_MISSING`. See [Gating invited users](/docs/recipes#gating-invited-users-with-validateuserinfo).
+
+## Invite state
+
+| Code                    | When                                                                                                        |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `INVITE_NOT_FOUND`      | Unknown or no longer valid token                                                                            |
+| `INVITE_EXPIRED`        | The invite passed its `expiresAt`                                                                           |
+| `INVITE_REVOKED`        | The invite was revoked                                                                                      |
+| `INVITE_ALREADY_USED`   | A single-use invite was already redeemed, or a public invite hit its use cap                                |
 | `EMAIL_ALREADY_INVITED` | A pending invite of the same kind (and, for `org-join`, the same org) already holds that address; resend it |
 | `USER_ALREADY_EXISTS`   | `app` invite to an address that already has an established account                                          |
 
@@ -31,7 +35,7 @@ import { INVITE_ERROR_CODES } from "@octopi-ai/better-enrollment";
 | `ROLE_NOT_ALLOWED_FOR_ORG_JOIN` | `org-join` invites cannot set an app role   |
 | `NOT_ALLOWED_TO_MANAGE_INVITES` | Failed the admin gate                       |
 
-## Redemption guards [!updated]
+## Redemption guards
 
 | Code                        | When                                                                      |
 | --------------------------- | ------------------------------------------------------------------------- |

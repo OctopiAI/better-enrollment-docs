@@ -2,6 +2,7 @@
 title: Quick Start
 description: Set up Better Enrollment step by step, for a closed app or open sign-up.
 icon: Rocket
+status: updated
 ---
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
@@ -104,13 +105,15 @@ export const auth = betterAuth({
 
 <Step>
 
-## Migrate the database
+## Migrate the database [!updated]
 
 ```bash
-npx @better-auth/cli migrate
+npx auth migrate
 # or, to review the SQL first
-npx @better-auth/cli generate
+npx auth generate
 ```
+
+On Better Auth 1.6 and earlier the CLI is `npx @better-auth/cli`. With Prisma or Drizzle, run `generate` and apply it with your ORM's migrations; see [Installation](/docs/installation#generate-the-schema).
 
 This creates the `invite` and `inviteUse` tables; see [Database](/docs/database) for every column.
 

@@ -1,0 +1,21 @@
+---
+title: Better Auth 1.7 support
+description: Users created by the plugin now pass through Better Auth 1.7's validateUserInfo gate, and rejections from your own gates reach the caller with your own error code.
+version: 0.5.1
+date: "2026-10-05"
+---
+
+### Fixes
+
+- **Better Auth 1.7**: Better Auth 1.7 needs every user creation to say where the user came from, and the plugin did not. Apps that configured `user.validateUserInfo` had every plugin-created user rejected with `validation_source_missing`. The plugin now passes `{ method: "invite" }` for the private-invite pre-created account, the account made at public redemption, and the replacement account made when a pre-created one has disappeared. Your gate can check `source.method === "invite"` to target invite sign-ups; see the [recipe](/docs/recipes#gating-invited-users-with-validateuserinfo).
+- **create / redeem**: A rejection from your own code while creating a user (a `validateUserInfo` error, or an `APIError` thrown from a `databaseHooks.user.create.before` hook) was reported as `EMAIL_ALREADY_INVITED` at create, or `PRE_CREATED_USER_MISSING` at redeem. It now reaches the caller unchanged, with your status and code.
+
+### Compatibility
+
+- Tested against Better Auth 1.6 and 1.7. The peer floor stays at `better-auth >= 1.4.0`.
+- Better Auth 1.7 checks the database schema at startup, and auth requests fail while it finds a mismatch. After upgrading, run `npx auth migrate` (Kysely), or `npx auth generate` and then your ORM's migration plus `prisma generate` (Prisma, Drizzle). See [Schema validation on Better Auth 1.7](/docs/database#schema-validation-on-better-auth-17).
+- The Better Auth CLI moved from `@better-auth/cli` to `auth` in 1.7. The docs now show both.
+
+### Migration notes
+
+No schema changes, no new error codes, and no API or response-shape changes. If you already use `validateUserInfo` and it branches on `source.method`, decide how it should treat `"invite"`: a gate that only allows known methods will now see invite sign-ups and could reject them.

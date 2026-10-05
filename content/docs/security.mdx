@@ -2,10 +2,9 @@
 title: Security
 description: What is blocked, why, and how tokens are stored.
 icon: ShieldCheck
-status: updated
 ---
 
-## What is blocked in invite-only mode [!updated]
+## What is blocked in invite-only mode
 
 While a private invite is pending:
 
@@ -25,7 +24,7 @@ After acceptance the user is verified, so OAuth linking and [magic-link sign-in]
 
 A private invite pre-creates an inert user, which locks the email. Without the hook, whoever controls the mailbox could set a password through the reset flow and skip the invite entirely, and outsiders could probe the endpoint to learn who has been invited. The hook returns Better Auth's own generic success response, byte-identical to the unknown-email case, and sends nothing.
 
-## The email lock [!updated]
+## The email lock
 
 An address stays locked within one scope while a pending invite row exists for it, even past `expiresAt`; re-inviting the same thing returns `CONFLICT` and [resend](/docs/invites#resending-an-invitation) is the way to revive it. A scope is one `kind` plus, for `org-join`, one organization. Invites in different scopes always coexist: the same person can hold pending invites to several orgs, or to the app and an org, and an org inviter cannot probe for pending invites outside their own org.
 

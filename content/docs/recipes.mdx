@@ -2,6 +2,7 @@
 title: Recipes
 description: Short patterns for common setups.
 icon: ChefHat
+status: updated
 ---
 
 ## Custom invite link URL
@@ -23,6 +24,25 @@ haveIBeenPwned({
   paths: ["/sign-up/email", "/reset-password", "/invite/redeem", "/invite/accept"]
 });
 ```
+
+## Gating invited users with validateUserInfo [!new]
+
+On Better Auth 1.7, `user.validateUserInfo` sees every user Better Enrollment creates: the pre-created account behind a private invite, and the account made when someone redeems a public invite. The plugin passes `source.method === "invite"`, so you can apply a rule to invite sign-ups only, or tell them apart from your other sign-up paths:
+
+```ts
+betterAuth({
+  user: {
+    validateUserInfo: ({ user, source }) => {
+      if (source.method !== "invite") return;
+      if (!String(user.email).endsWith("@acme.com")) {
+        return { error: "DOMAIN_NOT_ALLOWED", errorDescription: "Use your work email." };
+      }
+    }
+  }
+});
+```
+
+A private invite to a rejected address fails at `/invite/create`, so the inviter sees it straight away and nothing is stored. A rejected public redemption fails at redeem, and the use goes back to the invite. Both return your `code` with status `403`.
 
 ## Gating org creation by role
 

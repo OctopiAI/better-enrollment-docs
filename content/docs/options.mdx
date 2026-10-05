@@ -2,7 +2,6 @@
 title: Options
 description: Every option betterEnrollment accepts, with defaults.
 icon: Settings2
-status: updated
 ---
 
 Every option `betterEnrollment` accepts, grouped by concern. The values shown are the defaults.
@@ -83,7 +82,7 @@ betterEnrollment({
 
 `autoVerifyPublicInviteEmail` and its trade-offs are covered in [Verifying public-invite emails](/docs/invites#verifying-public-invite-emails). By default `invite.get` returns a masked email such as `a***@example.com`; see [The invite page](/docs/invite-page).
 
-## Passwordless [!new]
+## Passwordless
 
 For apps signing in with the [magic-link plugin](/docs/magic-link). Auto-detected; the options exist to force or extend it:
 
@@ -94,7 +93,7 @@ betterEnrollment({
 });
 ```
 
-## Additional fields [!new]
+## Additional fields
 
 Extra profile fields collected at redemption, declared like Better Auth's `user.additionalFields`:
 
@@ -116,7 +115,7 @@ betterEnrollment({
 - **No clobbering**: on `CONFIRM` the update targets an existing account, so `defaultValue` is never applied there.
 - **Rendering**: `invite.get` lists the step's fields in `requiredFields` / `optionalFields`, with a `{ type, required }` map in `additionalFields`; see [The invite page](/docs/invite-page).
 
-## Permissions [!new]
+## Permissions
 
 Two systems; the full picture, including per-action granularity and precedence, is on [Permissions](/docs/permissions).
 

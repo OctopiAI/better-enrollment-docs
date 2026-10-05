@@ -2,6 +2,7 @@
 title: Installation
 description: Add Better Enrollment to your project and generate the schema.
 icon: Download
+status: updated
 ---
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
@@ -12,7 +13,7 @@ import { BunIcon, NpmIcon, PnpmIcon, YarnIcon } from "@/components/icons";
 
 <Step>
 
-## Install the package
+## Install the package [!updated]
 
 <Tabs groupId="package-manager" persist defaultValue="npm">
 
@@ -69,21 +70,46 @@ bun add @octopi-ai/better-enrollment
 
 </Tabs>
 
-Requires `better-auth >= 1.4.0` and `zod >= 4`.
+Requires `better-auth >= 1.4.0` and `zod >= 4`. Tested against Better Auth 1.6 and 1.7.
 
 </Step>
 
 <Step>
 
-## Generate the schema
+## Generate the schema [!updated]
 
-After adding the plugin to your Better Auth configuration, generate or migrate your schema as usual:
+After adding the plugin to your Better Auth configuration, generate or migrate your schema as usual. Better Auth 1.7 ships its CLI as the `auth` package; the older `@better-auth/cli` is deprecated.
+
+<Tabs groupId="better-auth-version" persist defaultValue="1.7">
+
+<TabsList>
+  <TabsTrigger value="1.7">Better Auth 1.7</TabsTrigger>
+  <TabsTrigger value="1.6">Better Auth 1.6 and earlier</TabsTrigger>
+</TabsList>
+
+<Tab value="1.7">
+
+```bash
+npx auth migrate
+# or
+npx auth generate
+```
+
+</Tab>
+
+<Tab value="1.6">
 
 ```bash
 npx @better-auth/cli migrate
 # or
 npx @better-auth/cli generate
 ```
+
+</Tab>
+
+</Tabs>
+
+`migrate` only works with Better Auth's built-in Kysely adapter. With Prisma or Drizzle, run `generate` and then apply the change with your ORM's own migrations.
 
 This creates the `invite` and `inviteUse` tables. When organization features are enabled, the `organization` table also gains `seatLimit` and `disabledAt` columns.
 

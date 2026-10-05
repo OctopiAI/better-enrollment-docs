@@ -2,9 +2,10 @@
 title: Database
 description: The tables the plugin creates, every column, and how they are indexed.
 icon: Database
+status: updated
 ---
 
-Better Enrollment adds two tables, `invite` and `inviteUse`, and extends the organization plugin's `organization` table when org features are enabled. Run `npx @better-auth/cli generate` after installing to add them to your schema.
+Better Enrollment adds two tables, `invite` and `inviteUse`, and extends the organization plugin's `organization` table when org features are enabled. Run `npx auth generate` (or `npx @better-auth/cli generate` on Better Auth 1.6 and earlier) after installing to add them to your schema.
 
 ## invite
 
@@ -214,9 +215,18 @@ export const organizationFields = [
 
 Each configured [additional field](/docs/options#additional-fields) becomes a column on the user table, named after the field and typed by its `type`. Columns are always nullable: pre-created and open-mode users exist before redemption collects a value, so requiredness is enforced by the redeem flow rather than the database.
 
-## Indexes
+## Indexes [!updated]
 
-The schema indexes `email`, `organizationId`, `tokenHash` (unique), `status`, `expiresAt`, and `createdByUserId`. If your invite table grows into the millions, consider adding composite indexes `(email, status)` and `(organizationId, status)` in your own migrations; Better Auth's schema DSL only expresses single-column indexes.
+The schema indexes `email`, `organizationId`, `tokenHash` (unique), `status`, `expiresAt`, and `createdByUserId`. If your invite table grows into the millions, consider adding composite indexes `(email, status)` and `(organizationId, status)` in your own migrations. Better Auth 1.7 can declare multi-column indexes in a plugin schema, but the plugin keeps to single-column ones so the same schema still works on 1.4 to 1.6.
+
+## Schema validation on Better Auth 1.7 [!new]
+
+From Better Auth 1.7, the auth instance checks your database schema against what Better Auth and its plugins expect when it starts. Auth requests wait for that check and fail if it finds a mismatch, so a missing `invite` column now fails every auth request instead of only the invite flows. A mismatch is remembered and returned on every later request until Better Auth's own migration runs or the process restarts.
+
+- **Kysely** (the built-in adapter): the live database is inspected. Run `npx auth migrate` after upgrading the plugin.
+- **Prisma and Drizzle**: your local schema metadata is compared, without a database connection. For Prisma that means the generated client, so after `npx auth generate`, also run `prisma generate` and apply the migration before you deploy.
+
+The check is on by default. `advanced.database.validateSchema: false` turns it off, but treat that as a temporary escape hatch: the mismatch it hides is still there.
 
 ## Prisma example
 

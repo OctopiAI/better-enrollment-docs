@@ -2,7 +2,6 @@
 title: Invites
 description: Invite kinds, delivery types, and how to create each one.
 icon: Ticket
-status: updated
 ---
 
 import { Building2, PanelTop } from "lucide-react";
@@ -101,7 +100,7 @@ Resending mints a new token and a fresh expiry on the same invite row, so the pr
 
 Permissions mirror creation: app admins resend `app` and `org-create` invites (and act as a moderation backstop), org members with `invitation: ["create"]` resend their org's `org-join` invites. Accepted and revoked invites cannot be resent, and reviving an expired `org-join` invite re-checks the seat limit, since its reservation had been released.
 
-## Inviting someone who already has an account [!updated]
+## Inviting someone who already has an account
 
 This works out of the box for org kinds: the invite becomes an activation invite, the invitee signs in and confirms, and redemption merges roles and membership instead of creating a user. A plain `app` invite to an existing email is rejected with `USER_ALREADY_EXISTS`, since it grants nothing an existing user lacks.
 
