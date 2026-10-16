@@ -2,7 +2,6 @@
 title: Recipes
 description: Short patterns for common setups.
 icon: ChefHat
-status: updated
 ---
 
 ## Custom invite link URL
@@ -25,7 +24,7 @@ haveIBeenPwned({
 });
 ```
 
-## Gating invited users with validateUserInfo [!new]
+## Gating invited users with validateUserInfo
 
 On Better Auth 1.7, `user.validateUserInfo` sees every user Better Enrollment creates: the pre-created account behind a private invite, and the account made when someone redeems a public invite. The plugin passes `source.method === "invite"`, so you can apply a rule to invite sign-ups only, or tell them apart from your other sign-up paths:
 

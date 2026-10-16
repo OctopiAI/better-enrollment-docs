@@ -1,0 +1,16 @@
+---
+title: Disabled orgs freeze invite management
+description: Members of a disabled organization can no longer list, resend, revoke, or delete its invites, or read its seat usage. App admins keep moderating.
+version: 0.5.2
+date: "2026-10-16"
+---
+
+### Fixes
+
+- **Platform controls**: Disabling an organization already stopped invite creation and redemption, but its members could still manage the invites it had issued. An org owner or admin of a disabled org could list them (including invitee emails), read seat usage, resend an invite (which re-armed it with a fresh token), revoke it, or delete it. These calls now fail with `ORG_DISABLED`: `invite.list`, `invite.org.usage`, `invite.resend`, `invite.revoke`, and `invite.delete` for org members.
+- The check runs after the membership check, so someone outside the org still gets `ORG_INVITE_NOT_ALLOWED` and learns nothing about whether the org exists or is disabled.
+- App admins are unaffected: they can still list, revoke, and delete a disabled org's invites while investigating it. See [Platform controls](/docs/organizations#platform-controls).
+
+### Migration notes
+
+No schema changes, no new error codes, and no response-shape changes. If your UI lets org members manage invites, handle `ORG_DISABLED` on those calls the same way you already do at create and redeem.

@@ -2,6 +2,7 @@
 title: Organizations
 description: Org invites, seat limits, and platform controls.
 icon: Building2
+status: updated
 ---
 
 import { Settings2, ShieldCheck } from "lucide-react";
@@ -47,9 +48,9 @@ await authClient.invite.org.usage({ organizationId });
 // -> { seatLimit, members, pendingReserved, remaining }
 ```
 
-## Platform controls
+## Platform controls [!updated]
 
-App-admin only: disable, enable, and delete organizations. A disabled org refuses invite creation, redemption, and org plugin mutations. Member accounts are never touched by default; `banMembers: true` additionally bans every member app-wide, for fraud takedowns.
+App-admin only: disable, enable, and delete organizations. A disabled org refuses invite creation, redemption, and org plugin mutations. Its members also lose invite management: listing, resending, revoking, and deleting its invites and reading its seat usage all fail with `ORG_DISABLED`, while app admins can still list, revoke, and delete them. Member accounts are never touched by default; `banMembers: true` additionally bans every member app-wide, for fraud takedowns.
 
 ```ts
 await authClient.invite.org.disable({ organizationId });
