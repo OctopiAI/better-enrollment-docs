@@ -2,6 +2,7 @@
 title: The invite page
 description: One page and one redeem call handle every invite kind.
 icon: PanelTop
+status: updated
 ---
 
 import { Tab, Tabs, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
@@ -13,7 +14,7 @@ Every invitation link points at the same page, carrying only `?token=`. The invi
 const { data: invite } = await authClient.invite.get({ token });
 ```
 
-## Rendering by `nextAction`
+## Rendering by `nextAction` [!updated]
 
 | `invite.nextAction` | Meaning                       | What to render                               |
 | ------------------- | ----------------------------- | -------------------------------------------- |
@@ -24,7 +25,7 @@ const { data: invite } = await authClient.invite.get({ token });
 
 Two of the four are basic and never collect fields: `SIGN_IN` hands off to your sign-in form and `null` is a message. The other two are forms, and both can carry [additional fields](/docs/options#additional-fields): `SIGN_UP` collects them while creating the account, `CONFIRM` while activating on an existing one.
 
-`requiredFields` lists exactly what to collect: always `password` and `name` for sign-up, plus `email` for public invites, plus `organizationName` and `organizationSlug` for `org-create` (`CONFIRM` has no built-in fields). Additional fields configured for the current step appear too: required ones in `requiredFields`, optional ones in `optionalFields`, and `invite.additionalFields` carries `{ type, required }` for each so your page knows which input to render:
+`requiredFields` lists exactly what to collect: always `password` and `name` for sign-up, plus `email` for public invites, plus `organizationName` and `organizationSlug` for `org-create` unless the inviter [preset the organization](/docs/organizations#preset-organizations), in which case `invite.organizationName` already carries its name (`CONFIRM` has no built-in fields). Additional fields configured for the current step appear too: required ones in `requiredFields`, optional ones in `optionalFields`, and `invite.additionalFields` carries `{ type, required }` for each so your page knows which input to render:
 
 ```json
 {

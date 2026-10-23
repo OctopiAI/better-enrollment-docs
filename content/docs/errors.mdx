@@ -2,6 +2,7 @@
 title: Error codes
 description: Every APIError code the plugin can return.
 icon: TriangleAlert
+status: updated
 ---
 
 Errors are Better Auth `APIError`s carrying a `code` and a `message`:
@@ -53,4 +54,10 @@ Not every error from an invite endpoint is one of the codes below. When your own
 | `SEAT_LIMIT_REACHED`     | No seats left, at create or at redeem                                                       |
 | `ORG_INVITE_NOT_ALLOWED` | Not permitted to invite into that organization                                              |
 | `ORG_DISABLED`           | The organization is disabled: create, redeem, and org members managing its invites or usage |
-| `ORG_SLUG_TAKEN`         | Slug collision while founding an organization                                               |
+| `ORG_SLUG_TAKEN`         | Slug collision while founding an organization the founder names (preset slugs get a suffix) |
+
+## Listing [!new]
+
+| Code             | When                                        |
+| ---------------- | ------------------------------------------- |
+| `INVALID_CURSOR` | `invite.list` received a malformed `cursor` |

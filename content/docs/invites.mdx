@@ -84,6 +84,8 @@ await auth.api.createInvite({
 });
 ```
 
+Add `organization: { name, slug? }` to fix the new organization yourself; the founder then fills in only their account. See [Preset organizations](/docs/organizations#preset-organizations).
+
 A public `org-join` invite is a shareable join link for one org (in a seat-limited org `maxUses` is required). A public `org-create` invite founds a separate organization per use.
 
 ## Resending an invitation

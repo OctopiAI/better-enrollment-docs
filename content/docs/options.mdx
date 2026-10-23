@@ -60,7 +60,7 @@ betterEnrollment({
 });
 ```
 
-Both functions run on create and on resend. `inviteId`, `organizationId`, `organizationRole` and `teamId` come straight from the invite row, so one template can word each kind of invite differently (a new organization's first owner versus a team member) without looking the invite up by its token. App and `org-create` invites pass `null` for the organization fields; `teamId` is set only when an `org-join` invite names a team.
+Both functions run on create and on resend. `inviteId`, `organizationId`, `organizationRole` and `teamId` come straight from the invite row, so one template can word each kind of invite differently (a new organization's first owner versus a team member) without looking the invite up by its token. App and `org-create` invites pass `null` for the organization fields; `teamId` is set only when an `org-join` invite names a team. `organizationName` is the org's name for `org-join` invites and the [preset name](/docs/organizations#preset-organizations) for `org-create` invites that set one, otherwise `null`.
 
 ## Roles
 
@@ -158,7 +158,7 @@ betterEnrollment({
 });
 ```
 
-## Organizations
+## Organizations [!updated]
 
 Pass the same `ac` and `roles` objects you gave the organization plugin; the whole group is covered on [Organizations](/docs/organizations).
 
@@ -174,6 +174,7 @@ betterEnrollment({
     defaultSeatLimit: undefined,
     resolveSeatLimit: undefined, // async (org) => number | null
     revokeInvitesOnInviterBan: true,
+    beforeOrgCreate: undefined, // ({ invite, user, organization }) => extra org fields, or throw
     onOrgMemberAdded,
     onSeatLimitReached,
     onOrgDisabled,
@@ -182,6 +183,8 @@ betterEnrollment({
   }
 });
 ```
+
+`beforeOrgCreate` runs when an `org-create` redemption is about to found its org. The fields it returns are stored on the new organization, and throwing an `APIError` refuses the redemption while the invite stays pending; see [Stamping your own fields](/docs/organizations#stamping-your-own-fields-with-beforeorgcreate).
 
 ## Lifecycle hooks
 
