@@ -2,6 +2,7 @@
 title: Options
 description: Every option betterEnrollment accepts, with defaults.
 icon: Settings2
+status: updated
 ---
 
 Every option `betterEnrollment` accepts, grouped by concern. The values shown are the defaults.
@@ -17,7 +18,7 @@ betterEnrollment({
 
 `mode: "auto"` inspects your config at startup and picks the right mode; a mixed config throws and asks you to set `mode` explicitly. `allowOpenSignup: true` downgrades the open-sign-up-path error in invite-only mode to a warning, making the guarantee per-email. See [The two modes](/docs/modes).
 
-## Delivery
+## Delivery [!updated]
 
 Implementations are yours; the plugin never sends mail.
 
@@ -34,6 +35,10 @@ betterEnrollment({
     inviterName,
     inviterEmail,
     organizationName,
+    inviteId,
+    organizationId,
+    organizationRole,
+    teamId,
     expiresAt
   }) {},
   async sendPublicInvitation({
@@ -45,11 +50,17 @@ betterEnrollment({
     inviterName,
     inviterEmail,
     organizationName,
+    inviteId,
+    organizationId,
+    organizationRole,
+    teamId,
     maxUses,
     expiresAt
   }) {}
 });
 ```
+
+Both functions run on create and on resend. `inviteId`, `organizationId`, `organizationRole` and `teamId` come straight from the invite row, so one template can word each kind of invite differently (a new organization's first owner versus a team member) without looking the invite up by its token. App and `org-create` invites pass `null` for the organization fields; `teamId` is set only when an `org-join` invite names a team.
 
 ## Roles
 

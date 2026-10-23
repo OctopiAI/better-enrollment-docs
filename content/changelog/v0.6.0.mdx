@@ -1,0 +1,15 @@
+---
+title: Invite emails know their organization
+description: Delivery functions now receive the invite id, organization id, organization role and team, and server-side system invites can be attributed to the user they are sent for.
+version: 0.6.0
+date: "2026-10-23"
+---
+
+### Features
+
+- **delivery**: `sendPrivateInvitation` and `sendPublicInvitation` receive `inviteId`, `organizationId`, `organizationRole` and `teamId`, on create and on resend. Apps with several kinds of organization invite can word each email from these fields instead of hashing the token to find the invite row. App and `org-create` invites pass `null` for the organization fields. See [Delivery](/docs/options#delivery).
+- **api**: `createSystemInvite` accepts `inviter.userId`, stored as `createdByUserId`. When trusted server code sends an invite for someone (for example a parent organization inviting a child organization's first owner), the invite is attributed to them, and the admin plugin's ban and remove-user hooks clean it up like their own pending invites. See [Server-only](/docs/api#server-only).
+
+### Migration notes
+
+No schema changes, no new error codes, and no breaking changes. Existing delivery functions that destructure only the older fields keep working, and system invites without `inviter.userId` stay unattributed exactly as before.
