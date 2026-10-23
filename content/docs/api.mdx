@@ -2,6 +2,7 @@
 title: API reference
 description: Every client method, server-only endpoints, and rate limits.
 icon: CodeXml
+status: updated
 ---
 
 ## Client methods
@@ -51,18 +52,19 @@ authClient.invite.org.enable({ organizationId });
 authClient.invite.org.delete({ organizationId, banMembers? });
 ```
 
-## Server-only
+## Server-only [!updated]
 
 These endpoints are never mounted as HTTP routes; they exist only on `auth.api`.
 
-Create invites headlessly, with no session, for cron jobs and system integrations. Every invariant (email locks, seat limits, role validation) still runs; only the permission gates are skipped. Attribution falls back to your `appName`, then `"System"`, and `createdByUserId` is stored as null:
+Create invites headlessly, with no session, for cron jobs and system integrations. Every invariant (email locks, seat limits, role validation) still runs; only the permission gates are skipped. Attribution falls back to your `appName`, then `"System"`, and `createdByUserId` is stored as null unless you pass `inviter.userId`:
 
 ```ts
 await auth.api.createSystemInvite({
   body: {
     type: "private",
     email: "ada@example.com",
-    inviter: { name: "Billing", email: "billing@acme.com" } // optional
+    // optional; userId attributes the invite to a real user
+    inviter: { name: "Billing", email: "billing@acme.com", userId: actingUser.id }
   }
 });
 ```
@@ -71,9 +73,9 @@ await auth.api.createSystemInvite({
   `createSystemInvite` skips authentication and the admin gate; whoever can call it can mint invites
   for any role. Keep it in code paths you fully control, never behind a client-reachable route, and
   never forward unvalidated client input into fields like `role`, `organizationId`, `maxUses`, or
-  `inviter`. It also thins the audit trail: system invites store a null `createdByUserId` and a
-  self-declared inviter, so attribution is only as trustworthy as the caller, with the null
-  `createdByUserId` keeping them distinguishable from human invites.
+  `inviter`. It also thins the audit trail: without `inviter.userId`, system invites store a null
+  `createdByUserId` and a self-declared inviter, so attribution is only as trustworthy as the
+  caller, with the null `createdByUserId` keeping them distinguishable from human invites.
 </Callout>
 
 <Callout type="info" title="Preferred inviter name">
