@@ -1,6 +1,6 @@
 ---
 title: Organizations
-description: Org invites, seat limits, and platform controls.
+description: Org invites, seat limits, preset organizations, and platform controls.
 icon: Building2
 status: updated
 ---
@@ -48,6 +48,45 @@ await authClient.invite.org.usage({ organizationId });
 // -> { seatLimit, members, pendingReserved, remaining }
 ```
 
+## Preset organizations [!new]
+
+By default an `org-create` invite lets the founder name their organization on the invite page. When the inviter should decide instead (a platform onboarding a named customer, say), preset it at creation:
+
+```ts
+await auth.api.createInvite({
+  body: {
+    kind: "org-create",
+    email: "founder@acme.com",
+    organization: { name: "Acme Corp", slug: "acme" } // slug is optional
+  },
+  headers
+});
+```
+
+The founder then fills in only their own account. `invite.get` returns the preset as `organizationName` and leaves `organizationName` and `organizationSlug` out of `requiredFields`, and the invitation emails receive `organizationName` on create and resend. Redemption founds the org with the preset name and ignores any org fields in the redeem body, so the invitee cannot rename it.
+
+The slug is the preset one, or one derived from the name (`"Acme Corp"` becomes `acme-corp`). The founder has no way to pick another, so a slug that is taken by redemption time gets a short random suffix (`acme-corp-x7k2qp`) instead of failing with `ORG_SLUG_TAKEN`. Without a preset, nothing changes: the founder enters both fields and a taken slug fails as before. `organization` is accepted only on `org-create` invites; other kinds reject it with `ORG_FIELDS_NOT_ALLOWED`. It works the same through [`createSystemInvite`](/docs/api#server-only).
+
+### Stamping your own fields with `beforeOrgCreate`
+
+`organization.beforeOrgCreate` runs on every `org-create` redemption, just before the org row is written, with or without a preset. Return an object to store its fields on the new organization (declare them as `additionalFields` on the org plugin), or throw an `APIError` to refuse the redemption with that error:
+
+```ts title="auth.ts"
+betterEnrollment({
+  organization: {
+    async beforeOrgCreate({ invite, user, organization }) {
+      const record = await db.onboarding.findByInvite(invite.id);
+      if (!record) throw new APIError("FORBIDDEN", { code: "NOT_ISSUED_BY_US" });
+      return { type: record.type, parentOrganizationId: record.parentId };
+    }
+  }
+});
+```
+
+`organization` is the `{ name, slug }` about to be written. The plugin keeps `name`, `slug`, `createdAt`, `seatLimit` (from `presetSeatLimit`) and `disabledAt` for itself, so returning them has no effect.
+
+When the hook throws, the invite stays pending and redeemable later: for activations and private sign-ups the hook runs before the invite is claimed, and nothing has been written yet. A public sign-up has no account until after its claim, so there the hook runs right after the account is created; on a throw that account is deleted and the use returned. If you count users in a `databaseHooks.user.create` hook, that one sign-up path can briefly create a user that is then removed.
+
 ## Platform controls
 
 App-admin only: disable, enable, and delete organizations. A disabled org refuses invite creation, redemption, and org plugin mutations. Its members also lose invite management: listing, resending, revoking, and deleting its invites and reading its seat usage all fail with `ORG_DISABLED`, while app admins can still list, revoke, and delete them. Member accounts are never touched by default; `banMembers: true` additionally bans every member app-wide, for fraud takedowns.
@@ -58,7 +97,7 @@ await authClient.invite.org.enable({ organizationId });
 await authClient.invite.org.delete({ organizationId });
 ```
 
-## Who can do what [!updated]
+## Who can do what
 
 | Action                             | App admin           | Org owner or admin | Member with `invitation:create` | Plain member |
 | ---------------------------------- | ------------------- | ------------------ | ------------------------------- | ------------ |

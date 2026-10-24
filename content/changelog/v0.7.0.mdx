@@ -1,0 +1,16 @@
+---
+title: Preset organizations and keyset invite lists
+description: org-create invites can fix the organization they found, a beforeOrgCreate hook stamps your own columns on it or refuses the redemption, and invite.list pages with a stable cursor.
+version: 0.7.0
+date: "2026-10-24"
+---
+
+### Features
+
+- **create**: `org-create` invites accept `organization: { name, slug? }`, on `invite.create` and `createSystemInvite`. The founder then fills in only their account: `invite.get` returns the preset as `organizationName` and drops the org fields from `requiredFields`, redemption ignores org fields in the body, and `sendPrivateInvitation` / `sendPublicInvitation` receive `organizationName` on create and resend. The slug is the preset one or derived from the name, with a short random suffix when it is taken at redemption, since the founder cannot pick another. See [Preset organizations](/docs/organizations#preset-organizations).
+- **organizations**: `organization.beforeOrgCreate({ invite, user, organization })` runs just before an `org-create` redemption writes the org. Fields it returns are stored on the new organization (your org plugin `additionalFields`), and throwing an `APIError` refuses the redemption with that error while the invite stays pending. See [Stamping your own fields](/docs/organizations#stamping-your-own-fields-with-beforeorgcreate).
+- **list**: `invite.list` takes an opaque `cursor` and returns `nextCursor` (`null` on the last page). Keyset paging on `createdAt` then `id`, both descending, never skips or repeats a row, even across invites with the same timestamp. `page` keeps offset paging when no cursor is given. See [Management](/docs/api#management).
+
+### Migration notes
+
+Two new nullable columns on `invite`: `presetOrganizationName` and `presetOrganizationSlug`. Run `npx auth generate` (or your migration tool) before deploying. One new error code, `INVALID_CURSOR`. Nothing else changes: without `organization` an `org-create` invite behaves exactly as before (including `ORG_SLUG_TAKEN`), and `invite.list` responses only gain `nextCursor`.

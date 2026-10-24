@@ -2,6 +2,7 @@
 title: Database
 description: The tables the plugin creates, every column, and how they are indexed.
 icon: Database
+status: updated
 ---
 
 Better Enrollment adds two tables, `invite` and `inviteUse`, and extends the organization plugin's `organization` table when org features are enabled. Run `npx auth generate` (or `npx @better-auth/cli generate` on Better Auth 1.6 and earlier) after installing to add them to your schema.
@@ -84,6 +85,20 @@ export const inviteFields = [
     name: "presetSeatLimit",
     type: "number",
     description: "Seat limit applied to the organization founded through an org-create invite",
+    isOptional: true
+  },
+  {
+    name: "presetOrganizationName",
+    type: "string",
+    description:
+      "Name of the organization an org-create invite founds, fixed by the inviter. Null lets the founder choose",
+    isOptional: true
+  },
+  {
+    name: "presetOrganizationSlug",
+    type: "string",
+    description:
+      "Slug for that organization; derived from the name when null, and suffixed when taken at redemption",
     isOptional: true
   },
   {

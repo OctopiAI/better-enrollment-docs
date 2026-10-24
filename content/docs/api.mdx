@@ -16,15 +16,30 @@ authClient.invite.get({ token });
 authClient.invite.redeem({ token, ... });
 ```
 
-### Management
+### Management [!updated]
 
 ```ts
 authClient.invite.create({ kind?, type?, email?, name?, role?, maxUses?, expiresIn?,
-                           organizationId?, organizationRole?, teamId?, presetSeatLimit? });
-authClient.invite.list({ status?, type?, kind?, email?, organizationId?, page?, limit? });
+                           organizationId?, organizationRole?, teamId?, presetSeatLimit?,
+                           organization? });
+authClient.invite.list({ status?, type?, kind?, email?, organizationId?, cursor?, page?, limit? });
+// -> { invites, total, page, limit, nextCursor }
 authClient.invite.resend({ inviteId, expiresIn? });
 authClient.invite.revoke({ inviteId });
 authClient.invite.delete({ inviteId });
+```
+
+`organization: { name, slug? }` presets the organization an `org-create` invite founds; see [Preset organizations](/docs/organizations#preset-organizations).
+
+`list` returns invites newest first (`createdAt`, then `id`, both descending). For stable paging, pass the response's `nextCursor` back as `cursor` until it comes back `null`; it is opaque, and a malformed one fails with `INVALID_CURSOR`. Keyset paging never skips or repeats a row, even when invites share a timestamp or new ones arrive between pages. `page` still works for offset paging when no cursor is given (a cursor wins when both are sent), and `total` counts every match either way:
+
+```ts
+let cursor: string | undefined;
+do {
+  const { data } = await authClient.invite.list({ query: { limit: 50, cursor } });
+  render(data.invites);
+  cursor = data.nextCursor ?? undefined;
+} while (cursor);
 ```
 
 `resend` rotates the token and expiry on any pending invite, invalidating the previous link and redelivering it; see [Resending an invitation](/docs/invites#resending-an-invitation).
@@ -66,6 +81,11 @@ await auth.api.createSystemInvite({
     // optional; userId attributes the invite to a real user
     inviter: { name: "Billing", email: "billing@acme.com", userId: actingUser.id }
   }
+});
+
+// An org-create invite with a fixed organization; the founder enters no org fields
+await auth.api.createSystemInvite({
+  body: { kind: "org-create", email: "founder@acme.com", organization: { name: "Acme" } }
 });
 ```
 
