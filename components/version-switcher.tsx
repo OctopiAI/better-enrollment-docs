@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover, PopoverContent, PopoverTrigger } from "fumadocs-ui/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Layers } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -30,22 +30,23 @@ export function VersionSwitcher({ pages }: { pages: string[] }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
+        // Same box as Fumadocs' sidebar search trigger, so the two line up.
         className={cn(
-          "border-fd-border bg-fd-secondary/50 -mx-4 flex items-center gap-2 border-y px-4 py-2.5 text-start",
-          "hover:bg-fd-accent data-[popup-open]:bg-fd-accent transition-colors",
+          "bg-fd-secondary/50 text-fd-muted-foreground inline-flex items-center gap-2 rounded-lg border p-1.5 ps-2 text-start text-sm",
+          "hover:bg-fd-accent hover:text-fd-accent-foreground data-[popup-open]:bg-fd-accent transition-colors",
           "focus-visible:ring-fd-ring focus-visible:ring-2 focus-visible:outline-none"
         )}
         aria-label={`Documentation version: ${current.title} ${number(current)}`}
+        data-version-switcher=""
       >
-        <span className="flex flex-col gap-0.5">
-          <span className="text-fd-foreground text-sm leading-tight font-medium">
-            {current.title}
-          </span>
-          <span className="text-fd-muted-foreground font-mono text-xs leading-tight">
+        <Layers className="size-4 shrink-0" />
+        <span className="truncate">{current.title}</span>
+        <span className="ms-auto inline-flex items-center gap-1">
+          <kbd className="bg-fd-background rounded-md border px-1.5 font-mono">
             {number(current)}
-          </span>
+          </kbd>
+          <ChevronsUpDown className="size-4 shrink-0" />
         </span>
-        <ChevronsUpDown className="text-fd-muted-foreground ms-auto size-4 shrink-0" />
       </PopoverTrigger>
       <PopoverContent
         align="start"

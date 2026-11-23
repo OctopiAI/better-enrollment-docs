@@ -17,4 +17,18 @@ const changelog = defineCollections({
   })
 });
 
-export const changelogEntries = [...changelog.entries].sort((a, b) => b.date.localeCompare(a.date));
+/** Compares "1.0.0" and "0.8.1" numerically, part by part. */
+const compareVersions = (a: string, b: string) => {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] ?? 0) - (pb[i] ?? 0);
+    if (d !== 0) return d;
+  }
+  return 0;
+};
+
+/** Newest first; releases sharing a date are ordered by version. */
+export const changelogEntries = [...changelog.entries].sort(
+  (a, b) => b.date.localeCompare(a.date) || compareVersions(b.version, a.version)
+);

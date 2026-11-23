@@ -138,8 +138,9 @@
   border-radius: 0;
 }
 
-/* Sidebar search trigger: brand purple border */
-#nd-sidebar [data-search-full] {
+/* Sidebar search trigger and version switcher: brand purple border */
+#nd-sidebar [data-search-full],
+#nd-sidebar [data-version-switcher] {
   border-color: var(--primary);
 }
 
